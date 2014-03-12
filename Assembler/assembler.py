@@ -1,3 +1,5 @@
+import commandLenght
+
 class Command:
 	commandCode = 0
 	op2Type = 0
@@ -7,7 +9,7 @@ class Command:
 	value = 0
 	lenght = 0
 	
-class Data:
+class Variable:
 	name = 0
 	address = 0
 
@@ -49,21 +51,27 @@ commands = {
 	'LOOP'        	: 28
 	}
 
-codeText = open ('C:/Users/Roman/Documents/Code/OS/testProg01.txt', 'r')
+codeText = open ('C:/Users/Roman/Documents/GitHub/OS/Assembler/testProg01.txt', 'r')
 codeLineList = codeText.readlines()
 
 while '\n' in codeLineList: codeLineList.remove('\n')
 codeLineList = [codeLine.split() for codeLine in codeLineList]
+
+variables = []
+labels = []
 	
+position = 0
 for codeLine in codeLineList:
-	if commands[codeLine[0].upper()] == 0:
-		print 'DATA\n'
-	if commands[codeLine[0].upper()] == 1:
-		print 'ADD\n'
-	if commands[codeLine[0].upper()] == 7:
-		print 'STORE\n'
-	if commands[codeLine[0].upper()] == 8:
-		print 'LOAD\n'
-	if commands[codeLine[0].upper()] == 24:
-		print 'EXIT\n'
+	if codeLine[0][0] == '@':
+		newLabel = Label()
+		newLabel.name = codeLine[0]
+		newLabel.address = position
+		labels.append(newLabel)
+	elif codeLine[0].upper() in ['DW', 'DS', 'DB']:
+		newVariable = Variable()
+		newVariable.name = codeLine[1]
+		newVariable.address = position
+		variables.append(newVariable)
+		position += commandLenght.commandLenght(codeLine)
 	
+print position	

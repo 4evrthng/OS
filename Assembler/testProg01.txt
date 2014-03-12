@@ -1,6 +1,6 @@
 LOAD     AX sk1
 ADD AX sk2
-
+@testLabel
 ADD AX 50
 STORE sk1 AX
 
