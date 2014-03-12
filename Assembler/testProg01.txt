@@ -1,0 +1,10 @@
+LOAD     AX sk1
+ADD AX sk2
+
+ADD AX 50
+STORE sk1 AX
+
+EXIT
+
+DW sk1 10
+DW sk2 20
