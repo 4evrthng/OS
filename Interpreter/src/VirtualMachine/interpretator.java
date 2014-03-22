@@ -10,9 +10,9 @@ import java.nio.ByteBuffer;
 
 
 public class interpretator {
-	static reg8B AX, BX, CX;
-	static byte SF, IP;					//SF galima iskirti kaip klase ir tada metodus kiekvienam flag'ui
-	static long[] memory = new long[256];
+	reg8B AX, BX, CX;
+	byte SF, IP;					//SF galima iskirti kaip klase ir tada metodus kiekvienam flag'ui
+	long[] memory = new long[256];
 	
 	
 	
@@ -230,7 +230,7 @@ public class interpretator {
 	
 	
 	
-	public static void aritLog(byte[] cmdB) {
+	public void aritLog(byte[] cmdB) {
 		long op2 = 0;
 		long res = 0;
 		reg8B reg = null;
@@ -304,19 +304,27 @@ public class interpretator {
 			res = reg.value % op2;
 			reg.value = res;
 			break;
-		case 0x6: //CMP
+		case 0x6: //CMP else nunulint dar
 			res = reg.value - op2;
 			if (reg.value == op2) {
 				SF = (byte)(SF | 1 << 4); //ZF
+			} else {
+				SF = (byte)(SF & ~(1 << 4));
 			}
 			if (reg.value < op2) {
 				SF = (byte)(SF | 1 << 6); //CF
+			} else {
+				SF = (byte)(SF & ~(1 << 6));
 			}
 			if (((op2 >>> 31) != (res >>> 31))&&((reg.value >>> 31) == (op2 >>> 31))) {
 				SF = (byte)(SF | 1 << 0); //OF
+			} else {
+				SF = (byte)(SF & ~(1 << 0));
 			}
 			if ((res >>> 31) == 1) {
 				SF = (byte)(SF | 1 << 2); //SF
+			} else {
+				SF = (byte)(SF & ~(1 << 2));
 			}
 			break;
 		case 0x19: //AND
