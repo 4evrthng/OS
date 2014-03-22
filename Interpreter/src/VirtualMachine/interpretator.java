@@ -1,19 +1,23 @@
 package VirtualMachine;
 
-import java.io.File;
+import java.io.File; //ar imports gerai os.. like.. idk,k?..
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.channels.FileChannel;
 import java.nio.ByteBuffer;
 
+
+
 public class interpretator {
-	static long AX, BX, CX;
-	static byte SF, IP;
+	static reg8B AX, BX, CX;
+	static byte SF, IP;					//SF galima iskirti kaip klase ir tada metodus kiekvienam flag'ui
 	static long[] memory = new long[256];
 	
-	public static void Interpretator() {
-		
+	
+	
+	
+	public interpretator() {		
 		File pFile = new File("C:/Users/Helch/Desktop/codeBytes");
 	    FileInputStream inFile = null;
 	    try {
@@ -34,14 +38,17 @@ public class interpretator {
 	    } catch (IOException e) {
 	      e.printStackTrace(System.err);
 	    }
-	    AX = 0;
-	    BX = 0;
-	    CX = 0;
+	    AX = new reg8B();
+	    BX = new reg8B();
+	    CX = new reg8B();
 	    SF = 0;
 	    IP = 0;
 	}
-
-	public static boolean Interpreting() {
+	
+	
+	
+// interrupt del kreipimosi uz adresacijos ribu? 
+	public boolean interpreting() {
 		long cmd = memory[IP & 0xFF];
 		byte[] cmdB = new byte[4];
 		cmd = cmd >>> 32;
@@ -49,98 +56,44 @@ public class interpretator {
 			cmdB[3-i] = (byte)((cmd >>> 8*i) & 0xFF);
 		}
 		switch (cmdB[0]) {
-		//ADD--------------------------------+	
+		//ADD--------------------------------+
 		case 0x1:	
-			long op2 = 0;	//blogai, bet tai trumpina koda	
-			long res = 0; //irgi blogai
-			switch (cmdB[1]) {
-			// reg reg 
-			case 0x1:
-				switch(cmdB[3]){
-				//AX
-				case 0x1:
-					op2 = AX;
-					break;
-				//BX
-				case 0x2:
-					op2 = BX;
-					break;
-				//CX
-				case 0x3:
-					op2 = CX;
-					break;
-				}
-				break;
-			// reg atm
-			case 0x2:
-				op2 = memory[cmdB[3]&0xFF];
-				break;
-			// reg bet.op
-			case 0x3:
-				IP++;
-				op2 = memory[IP & 0xFF];
-			}
-			switch(cmdB[2]){
-			//AX
-			case 0x1:
-				res = AX + op2;
-				if ((AX + op2)!= res) {
-					SF = (byte)(SF | 1 << 6);
-				}
-				AX = res;
-				break;
-			//BX
-			case 0x2:
-				res = BX + op2;
-				if ((BX + op2)!= res) {
-					SF = (byte)(SF | 1 << 6);
-				}
-				BX = res;
-				break;
-			//CX
-			case 0x3:
-				res = CX + op2;
-				if ((CX + op2)!= res) {
-					SF = (byte)(SF | 1 << 6);
-				}
-				CX = res;
-				break;
-			}
+			aritLog(cmdB);
 			break;
-		//SUB--------------------------------
+		//SUB--------------------------------+
 		case 0x2:	
-			
+			aritLog(cmdB);
 			break;
-		//MUL--------------------------------			
+		//MUL--------------------------------+			
 		case 0x3:	
-			
+			aritLog(cmdB);
 			break;
-		//DIV--------------------------------
+		//DIV--------------------------------+
 		case 0x4:
-			
+			aritLog(cmdB);
 			break;
-		//MOD--------------------------------
+		//MOD--------------------------------+
 		case 0x5:
-			
+			aritLog(cmdB);
 			break;
-		//CMP--------------------------------
+		//CMP--------------------------------+
 		case 0x6:	
-					
+			aritLog(cmdB);		
 			break;
 		//LOAD--------------------------------+
 		case 0x7:	
 			switch(cmdB[2]){
 			//AX
 			case 0x1:	
-				AX = memory[cmdB[3] & 0xFF];
+				AX.value = memory[cmdB[3] & 0xFF];
 				break;
 			//BX
 			case 0x2:
-				BX = memory[cmdB[3] & 0xFF];
+				BX.value = memory[cmdB[3] & 0xFF];
 				break;
 			//CX
 			case 0x3:	
-				CX = memory[cmdB[3] & 0xFF];
+				CX.value = memory[cmdB[3] & 0xFF];
 				break;
 			}
 			
@@ -150,24 +103,24 @@ public class interpretator {
 			switch(cmdB[3]){
 			//AX
 			case 0x1:	
-				memory[cmdB[2] & 0xFF] = AX;
+				memory[cmdB[2] & 0xFF] = AX.value;
 				break;
 			//BX
 			case 0x2:	
-				memory[cmdB[2] & 0xFF] = BX;
+				memory[cmdB[2] & 0xFF] = BX.value;
 				break;
 			//CX							
 			case 0x3:	
-				memory[cmdB[2] & 0xFF] = CX;									
+				memory[cmdB[2] & 0xFF] = CX.value;									
 				break;
 			}
 			
 			break;
-		//LOADSHR--------------------------------
+		//LOADSHR--------------------------------??reik jau su pusliapiavimu turet?
 		case 0x9:
 			
 			break;
-		//STORESHR--------------------------------
+		//STORESHR--------------------------------??reik jau su pusliapiavimu turet?
 		case 0xA:	
 			
 			break;
@@ -234,49 +187,159 @@ public class interpretator {
 		//EXIT--------------------------------+
 		case 0x18:
 			return false;
-		//AND--------------------------------
+		//AND--------------------------------+
 		case 0x19:
-			
+			aritLog(cmdB);
 			break;
-		//OR--------------------------------
+		//OR--------------------------------+
 		case 0x1A:
-			
+			aritLog(cmdB);
 			break;
 		//NOT--------------------------------+
 		case 0x1B:
 			switch (cmdB[2]) {
 			//AX
 			case 0x1:
-				AX = ~AX;
+				AX.value = ~AX.value;
 				break;
 			//BX	
 			case 0x2:
-				BX = ~BX;
+				BX.value = ~BX.value;
 				break;
 			//CX
 			case 0x3:
-				CX = ~CX;
+				CX.value = ~CX.value;
 				break;
 			}
 			break;
 		//LOOP--------------------------------+
 		case 0x1C:
-			CX--;
-			if (CX != 0) {
+			CX.value--;
+			if (CX.value != 0) {
 				IP = cmdB[2];
 			}
 			break;
+		default:
+			return false;//Error del nezinomos komandos ir interrupt?
+			//break;
 		}
 		IP++;
 		return true;
 	}
+	
+	
+	
+	
+	public static void aritLog(byte[] cmdB) {
+		long op2 = 0;
+		long res = 0;
+		reg8B reg = null;
+		//nustato antra operanda
+		switch (cmdB[1]) {
+		// reg reg 
+		case 0x1:
+			switch(cmdB[3]){
+			//AX
+			case 0x1:
+				op2 = AX.value;
+				break;
+			//BX
+			case 0x2:
+				op2 = BX.value;
+				break;
+			//CX
+			case 0x3:
+				op2 = CX.value;
+				break;
+			}
+			break;
+		// reg atm
+		case 0x2:
+			op2 = memory[cmdB[3]&0xFF];
+			break;
+		// reg bet.op
+		case 0x3:
+			IP++;
+			op2 = memory[IP & 0xFF];
+			break;
+		}
+		switch(cmdB[2]){
+		//AX
+		case 0x1:
+			reg = AX;
+			break;
+		//BX
+		case 0x2:
+			reg = BX;
+			break;
+		//CX
+		case 0x3:
+			reg = CX;
+			break;
+		}
+		switch (cmdB[0]) {
+		case 0x1: //ADD
+			res = reg.value + op2;
+			if ((reg.value + op2)!= res) {
+				SF = (byte)(SF | 1 << 6); //CF
+			}
+			reg.value = res;
+			break;
+		case 0x2: //SUB
+			res = reg.value - op2;
+			reg.value = res;
+			break;
+		case 0x3: //MUL
+			res = reg.value * op2;
+			if ((reg.value * op2)!= res) {
+				SF = (byte)(SF | 1 << 6); //CF
+			}
+			reg.value = res;
+			break;
+		case 0x4: //DIV
+			res = reg.value / op2;
+			reg.value = res;
+			break;
+		case 0x5: //MOD
+			res = reg.value % op2;
+			reg.value = res;
+			break;
+		case 0x6: //CMP
+			res = reg.value - op2;
+			if (reg.value == op2) {
+				SF = (byte)(SF | 1 << 4); //ZF
+			}
+			if (reg.value < op2) {
+				SF = (byte)(SF | 1 << 6); //CF
+			}
+			if (((op2 >>> 31) != (res >>> 31))&&((reg.value >>> 31) == (op2 >>> 31))) {
+				SF = (byte)(SF | 1 << 0); //OF
+			}
+			if ((res >>> 31) == 1) {
+				SF = (byte)(SF | 1 << 2); //SF
+			}
+			break;
+		case 0x19: //AND
+			res = reg.value & op2;
+			reg.value = res;
+			break;
+		case 0x1A: //OR
+			res = reg.value | op2;
+			reg.value = res;
+			break;		
+		}
+	}
 
+	
+	
+	
 	public static void main(String[] args) {
-		Interpretator();
+		interpretator VM = new interpretator();
 		boolean a = true;
 		while (a) {
-			a = Interpreting();
+			a = VM.interpreting();
 		}
+		System.out.println();
 	}
 
 }
