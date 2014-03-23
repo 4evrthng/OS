@@ -59,6 +59,7 @@ codeText = open ('C:/Users/Roman/Documents/GitHub/OS/Assembler/testProg02_OUT.tx
 codeLineList = codeText.readlines()
 
 while '\n' in codeLineList: codeLineList.remove('\n')
+codeLinesUnsplit = codeLineList
 codeLineList = [codeLine.split() for codeLine in codeLineList]
 
 # First pass finds labels and variables in the code and saves their names and addresses
@@ -86,7 +87,7 @@ for codeLine in codeLineList:
 # Second pass determines the machine code and appends it to the assembledCode
 assembledCode = bytearray()
 
-for codeLine in codeLineList:
+for lineIndex, codeLine in enumerate(codeLineList):
 	#Commands that may take 1 or 2 words
 	if codeLine[0].upper() in ('ADD', 'SUB', 'MUL', 'DIV', 'MOD', 'CMP', 'AND', 'OR'):
 		assembledCode.append( commands[codeLine[0].upper()] )
@@ -218,10 +219,19 @@ for codeLine in codeLineList:
 				assembledCode.append( hexString[i])
 		#else:
 			#ERROR
-		
 	
-	
-	
+	#DS
+	if codeLine[0].upper() in ('DS'):
+		#if len(codeLine) < 3:
+			#ERROR
+		stringStart = codeLinesUnsplit[lineIndex].find(codeLine[1]) + len(codeLine[1])
+		while codeLinesUnsplit[lineIndex][stringStart].isspace():
+			stringStart = stringStart + 1
+			string = codeLinesUnsplit[lineIndex][stringStart : ]
+		for i in range(0, len(string)):
+				assembledCode.append( string[i])
+		for i in range(0, 8 - len(string) % 8):
+				assembledCode.append( 0x00)
 	
 codeBytes = open('testProg02_OUT', 'wb')
 codeBytes.write(assembledCode)

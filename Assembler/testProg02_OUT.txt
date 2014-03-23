@@ -1,6 +1,6 @@
 LOAD CX sk1
-OUT sk2
+OUT str1
 EXIT
 
-DW sk1 8
-DW sk2 5503809354147455000
+DW sk1 34
+DS str1 Pa pi pudi lalala luki mudi cukinu
