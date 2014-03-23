@@ -1,9 +1,9 @@
 package VirtualMachine;
 
-public class reg8B {
+public class Reg8B {
 	long value;
 	
-	public reg8B() {
+	public Reg8B() {
 		value = 0;
 	}
 }
