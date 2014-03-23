@@ -55,7 +55,7 @@ registers = {
 	'CX' : 3
 }
 	
-codeText = open ('C:/Users/Roman/Documents/GitHub/OS/Assembler/testProg01.txt', 'r')
+codeText = open ('C:/Users/Roman/Documents/GitHub/OS/Assembler/testProg02_OUT.txt', 'r')
 codeLineList = codeText.readlines()
 
 while '\n' in codeLineList: codeLineList.remove('\n')
@@ -223,6 +223,6 @@ for codeLine in codeLineList:
 	
 	
 	
-codeBytes = open('codeBytes', 'wb')
+codeBytes = open('testProg02_OUT', 'wb')
 codeBytes.write(assembledCode)
 codeBytes.close()
