@@ -1,5 +1,6 @@
 import commandLength
 import struct
+import sys
 
 class Command:
 	commandCode = 0
@@ -55,7 +56,7 @@ registers = {
 	'CX' : 3
 }
 	
-codeText = open ('C:/Users/Roman/Documents/GitHub/OS/Assembler/testProg02_OUT.txt', 'r')
+codeText = open (sys.argv[1], 'r')
 codeLineList = codeText.readlines()
 
 while '\n' in codeLineList: codeLineList.remove('\n')
@@ -233,6 +234,6 @@ for lineIndex, codeLine in enumerate(codeLineList):
 		for i in range(0, 8 - len(string) % 8):
 				assembledCode.append( 0x00)
 	
-codeBytes = open('testProg02_OUT', 'wb')
+codeBytes = open(sys.argv[2], 'wb')
 codeBytes.write(assembledCode)
 codeBytes.close()
