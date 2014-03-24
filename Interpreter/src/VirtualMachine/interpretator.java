@@ -19,7 +19,7 @@ public class Interpretator {
 	StatusFlag SF;
 	RegB IP;					
 //	long[] memory = new long[256];
-	long[][] memory = new long[16][16];
+	long[][] memory;
 	File[] f = new File[1]; //laikina, failo atidarymui ir naudojimui
 	
 																			
@@ -53,7 +53,7 @@ fileArray = Files.readAllBytes(file);*/								/*test perkelti tai i RM +-
 	    SF = new StatusFlag();
 	    IP = new RegB();
 	}
-	*/
+	*/	
 	public Interpretator(Reg8B a, Reg8B b, Reg8B c, StatusFlag s, RegB i, long[][] mem) {
 		AX = a;
 		BX = b;
@@ -65,7 +65,7 @@ fileArray = Files.readAllBytes(file);*/								/*test perkelti tai i RM +-
 	
 	
 	
-// interrupt del kreipimosi uz adresacijos ribu? 
+//TODO interrupt del kreipimosi uz adresacijos ribu? 
 	public boolean interpreting() {
 		Reg8B reg = null;
 		long op2 = 0;
@@ -122,11 +122,11 @@ fileArray = Files.readAllBytes(file);*/								/*test perkelti tai i RM +-
 			reg = getRegister(cmdB[3]);
 			memory[(cmdB[2] & 0xFF)/16][(cmdB[2] & 0xFF)%16] = reg.value;
 			break;
-		//LOADSHR--------------------------------??reik jau su pusliapiavimu turet?
+		//TODO LOADSHR--------------------------------??reik jau su pusliapiavimu turet?
 		case 0x9:
 			
 			break;
-		//STORESHR--------------------------------??reik jau su pusliapiavimu turet?
+		//TODO STORESHR--------------------------------??reik jau su pusliapiavimu turet?
 		case 0xA:	
 			
 			break;
@@ -138,7 +138,7 @@ fileArray = Files.readAllBytes(file);*/								/*test perkelti tai i RM +-
 		case 0xC://!!!!!!!!!!!!kanalo pra6yti turi
 			System.out.println(readFromMemoryCX(cmdB[2]));
 			break;
-		//FOPEN--------------------------------?
+		//TODO FOPEN--------------------------------?
 		case 0xD:	
 			String path = "";
 			int i,j=0;
@@ -158,7 +158,7 @@ fileArray = Files.readAllBytes(file);*/								/*test perkelti tai i RM +-
 			f[i] = pFile; //laikina, failo atidarymui ir naudojimui
 			BX.value = i; //laikina, failo atidarymui ir naudojimui
 			break;
-		//FREAD--------------------------------? netestuota, nesaugo kursoriaus
+		//TODO FREAD--------------------------------? netestuota, nesaugo kursoriaus
 		case 0xE:	
 			if (CX.value/8+(cmdB[2]&0xFF) >= 256) {
 				//daugiau nei atmintis reiktu error
@@ -183,7 +183,7 @@ fileArray = Files.readAllBytes(file);*/								/*test perkelti tai i RM +-
 			AX.value = s.length();
 			writeToMemoryAX(cmdB[2], s);
 			break;
-		//FWRITE--------------------------------? netestuota, nesaugo kursoriaus
+		//TODO FWRITE--------------------------------? netestuota, nesaugo kursoriaus
 		case 0xF:	
 			String s1 = readFromMemoryCX(cmdB[2]);//what, that's dumb of me
 			BufferedWriter writer;
@@ -193,15 +193,15 @@ fileArray = Files.readAllBytes(file);*/								/*test perkelti tai i RM +-
 				//error
 			}
 			break;
-		//FSEEK--------------------------------
+		//TODO FSEEK--------------------------------
 		case 0x10:	
 			
 			break;
-		//FCLOSE--------------------------------
+		//TODO FCLOSE--------------------------------
 		case 0x11:	
 		//f[(int)BX.value]; i masyva sudeti ne FILE, o scanner/writter? streamus
 			break;
-		//FDELETE--------------------------------
+		//TODO FDELETE--------------------------------
 		case 0x12:	
 			f[(int)BX.value].delete();
 			break;
@@ -261,7 +261,7 @@ fileArray = Files.readAllBytes(file);*/								/*test perkelti tai i RM +-
 			}
 			break;
 		default:
-			return false;//Error del nezinomos komandos ir interrupt?
+			return false;//TODO Error del nezinomos komandos ir interrupt?
 			//break;
 		} 
 		IP.value++;
@@ -355,7 +355,7 @@ fileArray = Files.readAllBytes(file);*/								/*test perkelti tai i RM +-
 			try {
 				c = (char) br.read();
 			} catch (IOException e) {
-				break;         ///kazkaip apdoroti ar ka?
+				break;         //TODO kazkaip apdoroti ar ka?
 			}
 			input +=c;
 			AX.value++;
@@ -387,7 +387,7 @@ fileArray = Files.readAllBytes(file);*/								/*test perkelti tai i RM +-
 	public String readFromMemoryCX(byte cmdB) {
 		String s = "";
 		if (CX.value/8+(cmdB&0xFF) >= 256) {
-			//daugiau nei atmintis reiktu error
+			//TODO daugiau nei atmintis reiktu error
 			//break;
 		}
 		long word = 0;
