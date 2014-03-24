@@ -9,10 +9,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
-import java.io.Reader;
 import java.nio.channels.FileChannel;
 import java.nio.ByteBuffer;
-import java.util.Scanner;
 
 
 
@@ -20,14 +18,14 @@ public class Interpretator {
 	Reg8B AX, BX, CX;
 	StatusFlag SF;
 	RegB IP;					
-	long[] memory = new long[256];
-	
+//	long[] memory = new long[256];
+	long[][] memory = new long[16][16];
 	File[] f = new File[1]; //laikina, failo atidarymui ir naudojimui
 	
-	
+																			
 	/* Path file = ...;
 byte[] fileArray;
-fileArray = Files.readAllBytes(file);*/
+fileArray = Files.readAllBytes(file);*/								/*test perkelti tai i RM +-
 	public Interpretator() {		
 		File pFile = new File("C:/Users/Helch/Desktop/testProg02_OUT");
 	    FileInputStream inFile = null;
@@ -55,6 +53,15 @@ fileArray = Files.readAllBytes(file);*/
 	    SF = new StatusFlag();
 	    IP = new RegB();
 	}
+	*/
+	public Interpretator(Reg8B a, Reg8B b, Reg8B c, StatusFlag s, RegB i, long[][] mem) {
+		AX = a;
+		BX = b;
+		CX = c;
+		SF = s;
+		IP = i;
+		memory = mem;
+	}
 	
 	
 	
@@ -62,7 +69,7 @@ fileArray = Files.readAllBytes(file);*/
 	public boolean interpreting() {
 		Reg8B reg = null;
 		long op2 = 0;
-		long cmd = memory[IP.value & 0xFF];
+		long cmd = memory[(IP.value & 0xFF)/16][(IP.value & 0xFF)%16];
 		byte[] cmdB = new byte[4];
 		cmd = cmd >>> 32;
 		for(int i = 0; i<4; i++){
@@ -108,12 +115,12 @@ fileArray = Files.readAllBytes(file);*/
 		//LOAD--------------------------------+
 		case 0x7:
 			reg = getRegister(cmdB[2]);
-			reg.value = memory[cmdB[3] & 0xFF];		
+			reg.value = memory[(cmdB[3] & 0xFF)/16][(cmdB[3] & 0xFF)%16];		
 			break;
 		//STORE--------------------------------+
 		case 0x8:	
 			reg = getRegister(cmdB[3]);
-			memory[cmdB[2] & 0xFF] = reg.value;
+			memory[(cmdB[2] & 0xFF)/16][(cmdB[2] & 0xFF)%16] = reg.value;
 			break;
 		//LOADSHR--------------------------------??reik jau su pusliapiavimu turet?
 		case 0x9:
@@ -138,7 +145,7 @@ fileArray = Files.readAllBytes(file);*/
 			byte cha = 0;
 			long word = 0;
 			while ((cha != 10)|((cmdB[2]&0xFF)+j!=256)) {
-				word = memory[(cmdB[2]&0xFF)+j];
+				word = memory[((cmdB[2] & 0xFF)+j)/16][((cmdB[2] & 0xFF)+j)%16];
 				i = 0;
 				while((cha!=10)||(i<8)) {
 					cha = (byte) ((word >>>(7-i)*8)&0xFF);
@@ -178,7 +185,7 @@ fileArray = Files.readAllBytes(file);*/
 			break;
 		//FWRITE--------------------------------? netestuota, nesaugo kursoriaus
 		case 0xF:	
-			String s1 = readFromMemoryCX(cmdB[2]);
+			String s1 = readFromMemoryCX(cmdB[2]);//what, that's dumb of me
 			BufferedWriter writer;
 			try {
 				writer = new BufferedWriter( new OutputStreamWriter(new FileOutputStream(f[(int)BX.value])));
@@ -291,12 +298,12 @@ fileArray = Files.readAllBytes(file);*/
 			break;
 		//  atm
 		case 0x2:
-			op2 = memory[cmdB[3]&0xFF];
+			op2 = memory[(cmdB[3] & 0xFF)/16][(cmdB[3] & 0xFF)%16];
 			break;
 		// reg bet.op
 		case 0x3:
 			IP.value++;
-			op2 = memory[IP.value & 0xFF];
+			op2 = memory[(IP.value & 0xFF)/16][(IP.value & 0xFF)%16];
 			break;
 		}
 		return op2;		
@@ -367,13 +374,13 @@ fileArray = Files.readAllBytes(file);*/
 				b = (byte) input.charAt(i*8+j);
 				mem = mem | (b << (7-j)*8);
 			}
-			memory[(cmdB&0xFF)+i] = mem;
+			memory[((cmdB&0xFF)+i)/16][((cmdB&0xFF)+i)%16] = mem;
 		}
 		for(int i=0; i<chars; i++) {
 			b = (byte) input.charAt(words*8+i);
 			mem = mem | (b << (7-i)*8);
 		}
-		memory[(cmdB&0xFF)+words] = mem;
+		memory[((cmdB&0xFF)+words)/16][((cmdB&0xFF)+words)%16] = mem;
 	}
 	
 	
@@ -387,7 +394,7 @@ fileArray = Files.readAllBytes(file);*/
 		int words =(int) CX.value/8;
 		byte cha = 0;
 		for(int i=0; i<words; i++) {
-			word = memory[(cmdB&0xFF)+i];
+			word = memory[((cmdB&0xFF)+i)/16][((cmdB&0xFF)+i)%16];
 			for(int j=0;j<8;j++) {
 				cha = (byte) ((word >>>(7-j)*8)&0xFF);
 				s+=((char)cha);
@@ -395,7 +402,7 @@ fileArray = Files.readAllBytes(file);*/
 		}
 		int chars = (int) (CX.value%8);
 		if (chars != 0) {
-			word = memory[(cmdB&0xFF)+words];
+			word = memory[((cmdB&0xFF)+words)/16][((cmdB&0xFF)+words)%16];
 			for(int i=0;i<chars;i++) {
 				cha = (byte) ((word >>>(7-i)*8)&0xFF);
 				s+=(char)cha;
