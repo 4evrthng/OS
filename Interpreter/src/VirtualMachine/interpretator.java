@@ -19,8 +19,8 @@ public class Interpretator {
 	StatusFlag SF;
 	RegB IP;					
 //	long[] memory = new long[256];
-	long[][] memory;
-	File[] f = new File[1]; //laikina, failo atidarymui ir naudojimui
+	long[][] memory = null;
+	File[] f = new File[1]; //laikina, failo atidarymui ir naudojimui //TODO tai perkelti i RM?
 	
 																			
 	/* Path file = ...;
@@ -62,14 +62,20 @@ fileArray = Files.readAllBytes(file);*/								/*test perkelti tai i RM +-
 		IP = i;
 		memory = mem;
 	}
+	//TODO ar veikia indeksavimas su ribiniais skaiciais
+	public static int index1(int i) {
+		return (i & 0xFF)/16;
+	}
 	
-	
+	public static int index2(int i) {
+		return (i & 0xFF)%16;
+	}
 	
 //TODO interrupt del kreipimosi uz adresacijos ribu? 
-	public boolean interpreting() {
+	public boolean interpreting() throws Exception {
 		Reg8B reg = null;
 		long op2 = 0;
-		long cmd = memory[(IP.value & 0xFF)/16][(IP.value & 0xFF)%16];
+		long cmd = memory[index1(IP.value)][index2(IP.value)];
 		byte[] cmdB = new byte[4];
 		cmd = cmd >>> 32;
 		for(int i = 0; i<4; i++){
@@ -98,7 +104,8 @@ fileArray = Files.readAllBytes(file);*/								/*test perkelti tai i RM +-
 		case 0x4:
 			reg = getRegister(cmdB[2]);
 			op2 = getOperand2(cmdB);
-			reg.value = reg.value / op2;
+			if (op2 == 0) throw new Exception(); //TODO dalyba is 0
+			else reg.value = reg.value / op2;
 			break;
 		//MOD--------------------------------+
 		case 0x5:
@@ -115,12 +122,12 @@ fileArray = Files.readAllBytes(file);*/								/*test perkelti tai i RM +-
 		//LOAD--------------------------------+
 		case 0x7:
 			reg = getRegister(cmdB[2]);
-			reg.value = memory[(cmdB[3] & 0xFF)/16][(cmdB[3] & 0xFF)%16];		
+			reg.value = memory[index1(cmdB[3])][index2(cmdB[3])];		
 			break;
 		//STORE--------------------------------+
 		case 0x8:	
 			reg = getRegister(cmdB[3]);
-			memory[(cmdB[2] & 0xFF)/16][(cmdB[2] & 0xFF)%16] = reg.value;
+			memory[index1(cmdB[2])][index2(cmdB[2])] = reg.value;
 			break;
 		//TODO LOADSHR--------------------------------??reik jau su pusliapiavimu turet?
 		case 0x9:
@@ -145,7 +152,7 @@ fileArray = Files.readAllBytes(file);*/								/*test perkelti tai i RM +-
 			byte cha = 0;
 			long word = 0;
 			while ((cha != 10)|((cmdB[2]&0xFF)+j!=256)) {
-				word = memory[((cmdB[2] & 0xFF)+j)/16][((cmdB[2] & 0xFF)+j)%16];
+				word = memory[index1(cmdB[2]+j)][index2(cmdB[2]+j)];
 				i = 0;
 				while((cha!=10)||(i<8)) {
 					cha = (byte) ((word >>>(7-i)*8)&0xFF);
@@ -298,12 +305,12 @@ fileArray = Files.readAllBytes(file);*/								/*test perkelti tai i RM +-
 			break;
 		//  atm
 		case 0x2:
-			op2 = memory[(cmdB[3] & 0xFF)/16][(cmdB[3] & 0xFF)%16];
+			op2 = memory[index1(cmdB[3])][index2(cmdB[3])];
 			break;
 		// reg bet.op
 		case 0x3:
 			IP.value++;
-			op2 = memory[(IP.value & 0xFF)/16][(IP.value & 0xFF)%16];
+			op2 = memory[index1(IP.value)][index2(IP.value)];
 			break;
 		}
 		return op2;		
@@ -374,13 +381,13 @@ fileArray = Files.readAllBytes(file);*/								/*test perkelti tai i RM +-
 				b = (byte) input.charAt(i*8+j);
 				mem = mem | (b << (7-j)*8);
 			}
-			memory[((cmdB&0xFF)+i)/16][((cmdB&0xFF)+i)%16] = mem;
+			memory[index1(cmdB+i)][index2(cmdB+i)] = mem;
 		}
 		for(int i=0; i<chars; i++) {
 			b = (byte) input.charAt(words*8+i);
 			mem = mem | (b << (7-i)*8);
 		}
-		memory[((cmdB&0xFF)+words)/16][((cmdB&0xFF)+words)%16] = mem;
+		memory[index1(cmdB+words)][index2(cmdB+words)] = mem;
 	}
 	
 	
@@ -394,7 +401,7 @@ fileArray = Files.readAllBytes(file);*/								/*test perkelti tai i RM +-
 		int words =(int) CX.value/8;
 		byte cha = 0;
 		for(int i=0; i<words; i++) {
-			word = memory[((cmdB&0xFF)+i)/16][((cmdB&0xFF)+i)%16];
+			word = memory[index1(cmdB+i)][index2(cmdB+i)];
 			for(int j=0;j<8;j++) {
 				cha = (byte) ((word >>>(7-j)*8)&0xFF);
 				s+=((char)cha);
@@ -402,7 +409,7 @@ fileArray = Files.readAllBytes(file);*/								/*test perkelti tai i RM +-
 		}
 		int chars = (int) (CX.value%8);
 		if (chars != 0) {
-			word = memory[((cmdB&0xFF)+words)/16][((cmdB&0xFF)+words)%16];
+			word = memory[index1(cmdB+words)][index2(cmdB+words)];
 			for(int i=0;i<chars;i++) {
 				cha = (byte) ((word >>>(7-i)*8)&0xFF);
 				s+=(char)cha;

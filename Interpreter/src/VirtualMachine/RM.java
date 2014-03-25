@@ -13,11 +13,11 @@ public class RM {
 	
 	File[] f = null; //TODO padaryti ,kad open file failus saugotu cia or smt...
 	long[][] oMemory = new long[160][16];
-	boolean[] PUsed = new boolean[160];  //TODO pakeist?
+	boolean[] PUsed = new boolean[160];  //TODO pakeist? i atminti irasyti
 	int TIME = 0;
 	Reg8B AX, BX, CX, PTR;
 	StatusFlag SF;
-	RegB IP, CH1, CH2, CH3, TI, SI, PI;
+	RegB IP, CH1, CH2, CH3, TI, SI, PI, MODE;
 	
 	
 	
@@ -35,7 +35,8 @@ public class RM {
 		TI = new RegB();
 		SI = new RegB();
 		PI = new RegB();
-		//PUsed[0] = true; //puslapiu lentele??
+		MODE = new RegB();
+		//TODO PUsed[0] = true; //puslapiu lentele?? supervizorine atminti pazymeti
 	}
 	
 	public Interpretator createVM(String path) throws Exception {//dar reikia sud4ti atminti i lentele ir rodyti su ptr?..
@@ -45,7 +46,7 @@ public class RM {
 		for(int k=0; k<160;k++) {
 			if (!PUsed[k]) s++;
 		}
-		if (s<16) throw new Exception();
+		if (s<16) throw new Exception();//TODO
 		PTR.value = 0;                //TODO
 		long [] pages = new long[2];
 		while (i < 16) {
@@ -119,13 +120,18 @@ public class RM {
 		boolean a = true;
 		while (a) {
 			System.out.println();
-			a = VM.interpreting();
+			try {
+				a = VM.interpreting();
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		} 
 		//TODO r.destroyVM(VM);
 		for(int i=0; i<160;i++) {
 			if (r.PUsed[i]) d++;
 		}
-		System.out.println(s);
-		System.out.println(d);
+		//System.out.println(s);
+		//System.out.println(d);
 	}
 }
