@@ -109,7 +109,7 @@ public class RM {
 		int s=0,d=0;
 		Interpretator VM = null;
 		try {
-			VM = r.createVM("C:/Users/Helch/Desktop/testProg02_OUT");
+			VM = r.createVM("/home/helchon/Desktop/git/OS/Assembler/codeBytes");
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
