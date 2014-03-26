@@ -76,7 +76,7 @@ for codeLine in codeLineList:
 		newLabel.address = position
 		labels.append(newLabel)
 	# Finds variables
-	elif codeLine[0].upper() in ['DW', 'DS', 'DB']:
+	elif codeLine[0].upper() in ['DW', 'DS', 'DM']:
 		newVariable = Variable()
 		newVariable.name = codeLine[1]
 		newVariable.address = position
@@ -233,6 +233,12 @@ for lineIndex, codeLine in enumerate(codeLineList):
 				assembledCode.append( string[i])
 		for i in range(0, 8 - len(string) % 8):
 				assembledCode.append( 0x00)
+				
+	#DM
+	if codeLine[0].upper() in ('DS'):
+		for i in range( 0 : commandLength.commandLength(codeLine)):
+			assembledCode.extend((0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00))
+			
 	
 codeBytes = open(sys.argv[2], 'wb')
 codeBytes.write(assembledCode)
