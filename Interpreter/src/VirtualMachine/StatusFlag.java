@@ -7,6 +7,18 @@ public class StatusFlag extends RegB {
 		super();
 	}
 	
+	public void setTF() {
+		value = (byte)(value | 1 << 7);
+	}
+	
+	public void clearTF() {
+		value = (byte)(value & ~(1 << 7));
+	}
+	
+	public boolean getTF() {
+		return 0x1 == ((value >>> 7)&0x1);
+	}
+	
 	public void setCF() {
 		value = (byte)(value | 1 << 6);
 	}

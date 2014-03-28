@@ -1,59 +1,13 @@
 package VirtualMachine;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.File; //ar imports gerai os.. like.. idk,k?..
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
-import java.nio.channels.FileChannel;
-import java.nio.ByteBuffer;
-
 
 
 public class Interpretator {
 	Reg8B AX, BX, CX;
 	StatusFlag SF;
 	RegB IP;					
-//	long[] memory = new long[256];
 	long[][] memory = null;
-	File[] f = new File[1]; //laikina, failo atidarymui ir naudojimui //TODO tai perkelti i RM?
-	
-																			
-	/* Path file = ...;
-byte[] fileArray;
-fileArray = Files.readAllBytes(file);*/								/*test perkelti tai i RM +-
-	public Interpretator() {		
-		File pFile = new File("C:/Users/Helch/Desktop/testProg02_OUT");
-	    FileInputStream inFile = null;
-	    try {
-	    	inFile = new FileInputStream(pFile);
-	    } catch (FileNotFoundException e) {
-	    	e.printStackTrace(System.err);
-	    }
-	    FileChannel inChannel = inFile.getChannel();
-	    ByteBuffer buf = ByteBuffer.allocate(8);
-	    int i = 0;
-	    try {
-	    	while (inChannel.read(buf) != -1) {
-	    		memory[i] = ((ByteBuffer) (buf.flip())).asLongBuffer().get();
-	    		buf.clear();
-	    		i++;
-	      }
-	      inFile.close();
-	    } catch (IOException e) {
-	      e.printStackTrace(System.err);
-	    }
-	    AX = new Reg8B();
-	    BX = new Reg8B();
-	    CX = new Reg8B();
-	    SF = new StatusFlag();
-	    IP = new RegB();
-	}
-	*/	
+
 	public Interpretator(Reg8B a, Reg8B b, Reg8B c, StatusFlag s, RegB i, long[][] mem) {
 		AX = a;
 		BX = b;
@@ -111,7 +65,8 @@ fileArray = Files.readAllBytes(file);*/								/*test perkelti tai i RM +-
 		case 0x5:
 			reg = getRegister(cmdB[2]);
 			op2 = getOperand2(cmdB);
-			reg.value = reg.value % op2;
+			if (op2 == 0) throw new Exception(); //TODO dalyba is 0
+			else reg.value = reg.value % op2;
 			break;
 		//CMP--------------------------------+
 		case 0x6:
@@ -146,59 +101,16 @@ fileArray = Files.readAllBytes(file);*/								/*test perkelti tai i RM +-
 			System.out.println(readFromMemoryCX(cmdB[2]));
 			break;
 		//TODO FOPEN--------------------------------?
-		case 0xD:	
-			String path = "";
-			int i,j=0;
-			byte cha = 0;
-			long word = 0;
-			while ((cha != 10)|((cmdB[2]&0xFF)+j!=256)) {
-				word = memory[index1(cmdB[2]+j)][index2(cmdB[2]+j)];
-				i = 0;
-				while((cha!=10)||(i<8)) {
-					cha = (byte) ((word >>>(7-i)*8)&0xFF);
-					if (cha!=10) path+=(char)cha; //ar butina per kastinimus?
-				}
-				j++;
-			}
-			File pFile = new File(path); // reiktu i6saugoti i rm masyva
-			i = 0; //laikina, failo atidarymui ir naudojimui
-			f[i] = pFile; //laikina, failo atidarymui ir naudojimui
-			BX.value = i; //laikina, failo atidarymui ir naudojimui
+		case 0xD:
+
 			break;
 		//TODO FREAD--------------------------------? netestuota, nesaugo kursoriaus
-		case 0xE:	
-			if (CX.value/8+(cmdB[2]&0xFF) >= 256) {
-				//daugiau nei atmintis reiktu error
-				//break;
-			}
-			String s = "";
-			int c=0;
-			BufferedReader reader;
-			try {
-				reader = new BufferedReader(new InputStreamReader(new FileInputStream(f[(int)BX.value])));
-			} catch (FileNotFoundException e) {
-				//error?
-				break;
-			}
-			try {
-				while ((s.length()<CX.value)||((c = reader.read()) != -1)) {
-					s += (char) c;
-				}
-			} catch (IOException e) {
-				//error?
-			}
-			AX.value = s.length();
-			writeToMemoryAX(cmdB[2], s);
+		case 0xE:
+			
 			break;
 		//TODO FWRITE--------------------------------? netestuota, nesaugo kursoriaus
 		case 0xF:	
-			String s1 = readFromMemoryCX(cmdB[2]);//what, that's dumb of me
-			BufferedWriter writer;
-			try {
-				writer = new BufferedWriter( new OutputStreamWriter(new FileOutputStream(f[(int)BX.value])));
-			} catch (FileNotFoundException e) {
-				//error
-			}
+
 			break;
 		//TODO FSEEK--------------------------------
 		case 0x10:	
@@ -206,11 +118,11 @@ fileArray = Files.readAllBytes(file);*/								/*test perkelti tai i RM +-
 			break;
 		//TODO FCLOSE--------------------------------
 		case 0x11:	
-		//f[(int)BX.value]; i masyva sudeti ne FILE, o scanner/writter? streamus
+			
 			break;
 		//TODO FDELETE--------------------------------
-		case 0x12:	
-			f[(int)BX.value].delete();
+		case 0x12:
+			
 			break;
 		//JMP--------------------------------+
 		case 0x13:	
@@ -263,7 +175,7 @@ fileArray = Files.readAllBytes(file);*/								/*test perkelti tai i RM +-
 		//LOOP--------------------------------+
 		case 0x1C:
 			CX.value--;
-			if (CX.value != 0) {
+			if (CX.value >= 0) {
 				IP.value = cmdB[2];
 			}
 			break;

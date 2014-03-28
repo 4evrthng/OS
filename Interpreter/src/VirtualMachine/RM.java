@@ -10,14 +10,12 @@ import java.nio.channels.FileChannel;
 import java.util.Random;
 
 public class RM {
-	
-	File[] f = null; //TODO padaryti ,kad open file failus saugotu cia or smt...
-	long[][] oMemory = new long[160][16];
-	boolean[] PUsed = new boolean[160];  //TODO pakeist? i atminti irasyti
+	long[][] userMemory = null;
+	SMem  supervMemory = null;
 	int TIME = 0;
-	Reg8B AX, BX, CX, PTR;
+	Reg8B AX, BX, CX;
 	StatusFlag SF;
-	RegB IP, CH1, CH2, CH3, TI, SI, PI, MODE;
+	RegB IP, CH1, CH2, CH3, TI, SI, PI, MODE, PTR;
 	
 	
 	
@@ -26,7 +24,6 @@ public class RM {
 		AX = new Reg8B();
 		BX = new Reg8B();
 		CX = new Reg8B();
-		PTR = new Reg8B();
 		SF = new StatusFlag();
 		IP = new RegB();
 		CH1 = new RegB();
@@ -36,31 +33,40 @@ public class RM {
 		SI = new RegB();
 		PI = new RegB();
 		MODE = new RegB();
-		//TODO PUsed[0] = true; //puslapiu lentele?? supervizorine atminti pazymeti
+		PTR = new RegB();
+		userMemory = new long[128][16];
+		supervMemory = new SMem();
+		setSharedMem();
 	}
 	
+
+	private void setSharedMem() {
+		for(int i=112;i<128;i++) supervMemory.pageTable[i] = i+1;
+		
+	}
+
+
 	public Interpretator createVM(String path) throws Exception {//dar reikia sud4ti atminti i lentele ir rodyti su ptr?..
-		int i = 0, j, s=0;
+		int i = 0, temp=0, j, s=0;
 		long[][] memory = new long[16][16];
 		Random rand = new Random();
-		for(int k=0; k<160;k++) {
-			if (!PUsed[k]) s++;
+		for(int k=0; k<128;k++) {
+			if (!this.pageUsed(k)) s++;
 		}
 		if (s<16) throw new Exception();//TODO
-		PTR.value = 0;                //TODO
-		long [] pages = new long[2];
 		while (i < 16) {
-			j = rand.nextInt(160);
-			if (!PUsed[j]) {
-				//if (i<4) pages[0] = pages[0] | ((long)j << i*8 );
-				//else pages[1] = pages[1] | ((long)j << (i-4)*8 );
-				PUsed[j] = true;
-				memory[i] = oMemory[j];
+			j = rand.nextInt(128);
+			if (!this.pageUsed(j)) {
+				if (i==0) {
+					PTR.value = (byte)(j&0xFF);
+				}
+				else this.setPageUsed(temp,j); //TODO
+				this.setPageUsed(j, 128);
+				temp = j;
+				memory[i] = userMemory[j];
 				i++;
 			}
 		}
-		//oMemory[(int) (PTR.value/16)][(int) (PTR.value%16)] = pages[0];
-		//oMemory[(int) ((PTR.value+1)/16)][(int) ((PTR.value+1)%16)] = pages[1];
 		File pFile = new File(path);
 	    FileInputStream inFile = null;
 	    try {
@@ -86,25 +92,43 @@ public class RM {
 	    } catch (IOException e) {
 	      e.printStackTrace(System.err);
 	    }
-		
+	    Interpretator vmachine = new Interpretator(AX, BX, CX, SF, IP, memory);
+		this.saveVM(vmachine);
 		return new Interpretator(AX, BX, CX, SF, IP, memory);
 	}
+
+	private void setPageUsed(int point, int to) {
+		// TODO test
+		supervMemory.pageTable[point] = to;
+		if (to!=128) supervMemory.pageTable[to] = 128;
+	}
+
+
+	private boolean pageUsed(int k) {
+		//TODO test
+		if (supervMemory.pageTable[k]!=0) return true;
+		else return false;
+	}
+
+
+	private void saveVM(Interpretator vmachine) {
+		this.supervMemory.desc.addFirst(new VMDesc(vmachine, PTR));
+	}
+
 	
-	/*
-	public void destroyVM(Interpretator VM) {
-		for(int i=0;i<16;i++) {
-			if (i<4) PUsed[(int) (oMemory[(int) (PTR.value/16)][(int) (PTR.value%16)] & (0xFF << i*8))] = false;
-			else PUsed[(int) (oMemory[(int) ((PTR.value+1)/16)][(int) ((PTR.value+1)%16)] & (0xFF << (i-4)*8))] = false;
-		}
-	}*/
+	public void destroyCurrentVM() {
+		int b = this.supervMemory.desc.get(0).PTR;
+		this.supervMemory.desc.remove();
+		clearPage(b);
+	}
+	
+	public void clearPage(int b) {
+		int i = supervMemory.pageTable[b];
+		if (i!=128) clearPage(i);
+		supervMemory.pageTable[b] = 0;
+	}
 
 	public static void main(String[] args) {
-	/*	Interpretator VM = new Interpretator();
-		boolean a = true;
-		while (a) {
-			System.out.println();
-			a = VM.interpreting();
-		} */
 		RM r = new RM();
 		int s=0,d=0;
 		Interpretator VM = null;
@@ -114,12 +138,14 @@ public class RM {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		for(int i=0; i<160;i++) {
-			if (r.PUsed[i]) s++;
+		for(int i=0; i<128;i++) {
+			if (r.pageUsed(i)) s++;
 		}
+
+
 		boolean a = true;
 		while (a) {
-			System.out.println();
+		//	System.out.println();
 			try {
 				a = VM.interpreting();
 			} catch (Exception e) {
@@ -127,11 +153,12 @@ public class RM {
 				e.printStackTrace();
 			}
 		} 
-		//TODO r.destroyVM(VM);
-		for(int i=0; i<160;i++) {
-			if (r.PUsed[i]) d++;
+		//TODO 
+		r.destroyCurrentVM();
+		for(int i=0; i<128;i++) {
+			if (r.pageUsed(i)) d++;
 		}
-		//System.out.println(s);
-		//System.out.println(d);
+		System.out.println(s);
+		System.out.println(d);
 	}
 }
