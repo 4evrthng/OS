@@ -39,7 +39,7 @@ public class RM {
 		setSharedMem();
 	}
 	
-
+	//TODO padaryti nenuosekliai ir sukurti shared memory deskriptoriu?
 	private void setSharedMem() {
 		for(int i=112;i<128;i++) supervMemory.pageTable[i] = i+1;
 		
@@ -127,6 +127,18 @@ public class RM {
 		if (i!=128) clearPage(i);
 		supervMemory.pageTable[b] = 0;
 	}
+	
+	//TODO pabaigti
+	public boolean run(Interpretator VM) {
+		Interrupt inter = null;
+		while (true){
+			while (inter == null) { //or anything else
+				inter = VM.interpreting();
+			}
+			if (inter.interruptCode==0) return true; //TODO apdorojimai
+		}
+	}
+	
 
 	public static void main(String[] args) {
 		RM r = new RM();
@@ -141,18 +153,9 @@ public class RM {
 		for(int i=0; i<128;i++) {
 			if (r.pageUsed(i)) s++;
 		}
+		r.run(VM);
 
-
-		boolean a = true;
-		while (a) {
-		//	System.out.println();
-			try {
-				a = VM.interpreting();
-			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		} 
+		
 		//TODO 
 		r.destroyCurrentVM();
 		for(int i=0; i<128;i++) {
