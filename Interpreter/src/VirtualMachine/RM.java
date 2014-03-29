@@ -10,6 +10,7 @@ import java.nio.channels.FileChannel;
 import java.util.Random;
 
 public class RM {
+	public static final int MAX_PAGES =128;
 	long[][] userMemory = null;
 	SMem  supervMemory = null;
 	int TIME = 0;
@@ -34,14 +35,14 @@ public class RM {
 		PI = new RegB();
 		MODE = new RegB();
 		PTR = new RegB();
-		userMemory = new long[128][16];
+		userMemory = new long[MAX_PAGES][16];
 		supervMemory = new SMem();
 		setSharedMem();
 	}
 	
 	//TODO padaryti nenuosekliai ir sukurti shared memory deskriptoriu?
 	private void setSharedMem() {
-		for(int i=112;i<128;i++) supervMemory.pageTable[i] = i+1;
+		for(int i=112;i<MAX_PAGES;i++) supervMemory.pageTable[i] = i+1;
 		
 	}
 
@@ -50,23 +51,22 @@ public class RM {
 		int i = 0, temp=0, j, s=0;
 		long[][] memory = new long[16][16];
 		Random rand = new Random();
-		for(int k=0; k<128;k++) {
-			if (!this.pageUsed(k)) s++;
-		}
+		
+		for(int k=0; k<MAX_PAGES;k++) if (!this.pageUsed(k)) s++;
 		if (s<16) throw new Exception();//TODO
+		
 		while (i < 16) {
-			j = rand.nextInt(128);
-			if (!this.pageUsed(j)) {
-				if (i==0) {
-					PTR.value = (byte)(j&0xFF);
-				}
-				else this.setPageUsed(temp,j); //TODO
-				this.setPageUsed(j, 128);
-				temp = j;
-				memory[i] = userMemory[j];
-				i++;
-			}
+			j = rand.nextInt(MAX_PAGES);
+			while (this.pageUsed(j)) if (j!=MAX_PAGES-1) j++; else j=0;
+			
+			if (i==0) PTR.value = (byte)(j&0xFF);
+			else this.setPageUsed(temp,j); 
+			this.setPageUsed(j, MAX_PAGES);
+			temp = j;
+			memory[i] = userMemory[j];
+			i++;
 		}
+		//6ita dalis keliau lauk
 		File pFile = new File(path);
 	    FileInputStream inFile = null;
 	    try {
@@ -92,39 +92,62 @@ public class RM {
 	    } catch (IOException e) {
 	      e.printStackTrace(System.err);
 	    }
+	    //dalis iki cia.
 	    Interpretator vmachine = new Interpretator(AX, BX, CX, SF, IP, memory);
-		this.saveVM(vmachine);
+		this.saveNewVM(vmachine);
 		return new Interpretator(AX, BX, CX, SF, IP, memory);
 	}
 
-	private void setPageUsed(int point, int to) {
+	private void setPageUsed(int currentPage, int nextPage) {
 		// TODO test
-		supervMemory.pageTable[point] = to;
-		if (to!=128) supervMemory.pageTable[to] = 128;
+		supervMemory.pageTable[currentPage] = nextPage;
+		if (nextPage!=MAX_PAGES) supervMemory.pageTable[nextPage] = MAX_PAGES;
 	}
 
 
 	private boolean pageUsed(int k) {
-		//TODO test
 		if (supervMemory.pageTable[k]!=0) return true;
 		else return false;
 	}
 
 
-	private void saveVM(Interpretator vmachine) {
+	private void saveNewVM(Interpretator vmachine) {
 		this.supervMemory.desc.addFirst(new VMDesc(vmachine, PTR));
+	}
+	
+	public void saveCurrentVM() {
+		boolean found = false;
+		int i = -1;
+		VMDesc desc = null;
+		while (!found) {
+			i++;
+			if (i>=this.supervMemory.desc.size()) ;//TODO error some kind
+			desc = this.supervMemory.desc.get(i);
+			if (desc.PTR == PTR.value) found = true;
+		}
+		desc.AX = AX.value;
+		desc.CX = CX.value;
+		desc.BX = BX.value;
+		desc.IP = IP.value;
+		desc.SF = SF.value;
 	}
 
 	
 	public void destroyCurrentVM() {
-		int b = this.supervMemory.desc.get(0).PTR;
-		this.supervMemory.desc.remove();
-		clearPage(b);
+		boolean found = false;
+		int i = -1;
+		while (!found) {
+			i++;
+			if (i>=this.supervMemory.desc.size()) ;//TODO error some kind
+			if (this.supervMemory.desc.get(i).PTR == PTR.value) found = true;
+		}
+		this.supervMemory.desc.remove(i);
+		clearPage(PTR.value);
 	}
 	
 	public void clearPage(int b) {
 		int i = supervMemory.pageTable[b];
-		if (i!=128) clearPage(i);
+		if (i!=MAX_PAGES) clearPage(i);
 		supervMemory.pageTable[b] = 0;
 	}
 	
@@ -132,8 +155,10 @@ public class RM {
 	public boolean run(Interpretator VM) {
 		Interrupt inter = null;
 		while (true){
+			TIME = 12; //TODO sugalvoti k1 daryti su time
 			while (inter == null) { //or anything else
 				inter = VM.interpreting();
+				TIME--;
 			}
 			if (inter.interruptCode==0) return true; //TODO apdorojimai
 		}
@@ -150,7 +175,7 @@ public class RM {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		for(int i=0; i<128;i++) {
+		for(int i=0; i<MAX_PAGES;i++) {
 			if (r.pageUsed(i)) s++;
 		}
 		r.run(VM);
@@ -158,7 +183,7 @@ public class RM {
 		
 		//TODO 
 		r.destroyCurrentVM();
-		for(int i=0; i<128;i++) {
+		for(int i=0; i<MAX_PAGES;i++) {
 			if (r.pageUsed(i)) d++;
 		}
 		System.out.println(s);
