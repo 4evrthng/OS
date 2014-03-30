@@ -150,32 +150,80 @@ public class RM {
 		if (i!=MAX_PAGES) clearPage(i);
 		supervMemory.pageTable[b] = 0;
 	}
-	
+	//TODO meniu parasyti
+	public int meniu (String message[])
+	{
+		//TODO ateina string masyvas
+		/*pvz a
+			a[0]pranesimas, jei nera 1 tai tada nera issiunciami pasirinkimai
+			a[1]valgyti
+			a[2]gerti
+			...
+			a[n]miegoti
+		Isvedimas: 
+			Message: Pranesimas, Choose one of the options entering number of the option
+			Option 1: valgyti
+			Option 2: gerti
+			Option 3: miegoti
+		
+		*/
+		System.out.println("Message: "+message[0]);
+		if (message[1])
+		{
+			System.out.println("")
+		
+			for (i = 0;i==message.length(),i++)
+			{
+			
+			}
+		}
+	}
+		
+	}
 	public void start(interpretator vm)
 	{
-		int code = this.run(vm);
-		switch (code)
+		String trapFlagMenu[]("trapflag","NextStep","show details","change details","run","terminate");
+		interrupt code = this.run(vm);
+		switch (code.interruptCode)
 		{//apdoroti interupto koda
-			case 1: //TODO
-			case 2://TODO
-			case 3://TODO
-			case 4://TODO
-			case 5://TODO
-			case 6://TODO
-			case 7://TODO
-			case 8://TODO
-			case 9://TODO 
+			case 0: // TODO EXIT
+				System.out.println("Program has finished successfully");
+				break;
+			case 1: // TODO Trap FLag(menu)
+				
+				break;
+			case 2://TODO neatpazinta komanda
+				break;
+			case 3://TODO dalyba is 0
+				break;
+			case 4://TODO perzengti adresacijos reziai
+				break;
+			case 5://TODO in
+				break;
+			case 6://TODO out
+				break;
+			case 7://TODO loadshare
+				break;
+			case 8://TODO streshare
+				break;
+			case 9://TODO  fopen
+				break;
+			case 10: //TODO fread
+				break;
+			case 11: //TODO fseek
+				break;
+			case 12://TODO Fclose
+				break;
+			case 13://TODO Fdelete
+				break;
+			case 14://TODO time
+				break;
+			//case 15://TODO
+			//case 16://TODO
+			//case 17://TODO
 				
 				
 		}
-		//TODO: paleidzia ji
-		//TODO: laukia interrupt'u
-		//TODO juos sutikus apdoroja
-			//todo: PI - 
-			//todo: SI - 
-			//todo: OUT - 
-			//todo: IN - 
-			//todo: EXIT - 
 	}
 	//TODO pabaigti
 	public boolean run(Interpretator VM) {//TODO: sitas metodas grazina interrupt koda?
