@@ -42,8 +42,51 @@ public class RM {
 	
 	//TODO padaryti nenuosekliai ir sukurti shared memory deskriptoriu?
 	private void setSharedMem() {
-		for(int i=112;i<MAX_PAGES;i++) supervMemory.pageTable[i] = i+1;
-		
+		int temp, j=0, i=0;
+		Random rand = new Random();
+		while (i < 16) {
+			j = rand.nextInt(MAX_PAGES);
+			while (this.pageUsed(j)) if (j!=MAX_PAGES-1) j++; else j=0;
+			
+			if (i==0) PTR.value = (byte)(j&0xFF);
+			else this.setPageUsed(temp,j); 
+			this.setPageUsed(j, MAX_PAGES);
+			temp = j;
+			i++;
+		}
+		supervMemory.shareMem = new SharedMemoryDesc(PTR.value);
+	}
+	
+	//TODO test shared
+	private void loadShr(Reg8B reg, int mem) {
+		int block = getSharedBlock(mem/16);
+		if (supervMemory.shareMem.getSemafor(block))  ;//TODO sugalvoti, k1 daryti, kai naudojama atmintis tuo metu
+		else {
+			supervMemory.shareMem.setSemafor(block);
+			int word = mem%16;
+			reg.value = userMemory[block][word];
+			supervMemory.shareMem.clearSemafor(block);
+		}
+	}
+
+	private void storeShr(Reg8B reg, int mem) {
+		int block = getSharedBlock(mem/16);
+		if (supervMemory.shareMem.getSemafor(block))  ;//TODO sugalvoti, k1 daryti, kai naudojama atmintis tuo metu
+		else {
+			supervMemory.shareMem.setSemafor(block);
+			int word = mem%16;
+			userMemory[block][word] = reg.value;
+			supervMemory.shareMem.clearSemafor(block);
+		}
+	}
+	
+	private int getSharedBlock(int i) {
+		int block = supervMemory.shareMem.PTR &0xFF;
+		while(i!=0) {
+			block = supervMemory.pageTable[block];
+			i--;
+		}
+		return block;
 	}
 
 
@@ -66,6 +109,7 @@ public class RM {
 			memory[i] = userMemory[j];
 			i++;
 		}
+		
 		//6ita dalis keliau lauk
 		File pFile = new File(path);
 	    FileInputStream inFile = null;
@@ -93,6 +137,7 @@ public class RM {
 	      e.printStackTrace(System.err);
 	    }
 	    //dalis iki cia.
+	    
 	    Interpretator vmachine = new Interpretator(AX, BX, CX, SF, IP, memory);
 		this.saveNewVM(vmachine);
 		return new Interpretator(AX, BX, CX, SF, IP, memory);
@@ -183,7 +228,7 @@ public class RM {
 	public void start(interpretator vm)
 	{
 		String trapFlagMenu[]("trapflag","NextStep","show details","change details","run","terminate");
-		interrupt code = this.run(vm);
+		Interrupt code = this.run(vm);
 		switch (code.interruptCode)
 		{//apdoroti interupto koda
 			case 0: // TODO EXIT
@@ -203,8 +248,10 @@ public class RM {
 			case 6://TODO out
 				break;
 			case 7://TODO loadshare
+				loadShr(code.reg, code.memAdress);
 				break;
 			case 8://TODO streshare
+				storeShr(code.reg, code.memAdress);
 				break;
 			case 9://TODO  fopen
 				break;
