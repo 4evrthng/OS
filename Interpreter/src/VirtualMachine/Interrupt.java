@@ -1,7 +1,7 @@
 package VirtualMachine;
 
 public class Interrupt {
-	int interruptCode;
+	int interruptCode; //make it public?
 	Reg8B reg = null;
 	int memAdress = -1;
 	
