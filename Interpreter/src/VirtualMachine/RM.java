@@ -151,8 +151,34 @@ public class RM {
 		supervMemory.pageTable[b] = 0;
 	}
 	
+	public void start(interpretator vm)
+	{
+		int code = this.run(vm);
+		switch (code)
+		{//apdoroti interupto koda
+			case 1: //TODO
+			case 2://TODO
+			case 3://TODO
+			case 4://TODO
+			case 5://TODO
+			case 6://TODO
+			case 7://TODO
+			case 8://TODO
+			case 9://TODO 
+				
+				
+		}
+		//TODO: paleidzia ji
+		//TODO: laukia interrupt'u
+		//TODO juos sutikus apdoroja
+			//todo: PI - 
+			//todo: SI - 
+			//todo: OUT - 
+			//todo: IN - 
+			//todo: EXIT - 
+	}
 	//TODO pabaigti
-	public boolean run(Interpretator VM) {
+	public boolean run(Interpretator VM) {//TODO: sitas metodas grazina interrupt koda?
 		Interrupt inter = null;
 		while (true){
 			TIME = 12; //TODO sugalvoti k1 daryti su time
@@ -178,8 +204,8 @@ public class RM {
 		for(int i=0; i<MAX_PAGES;i++) {
 			if (r.pageUsed(i)) s++;
 		}
-		r.run(VM);
-
+		//r.run(VM);
+		r.start();
 		
 		//TODO 
 		r.destroyCurrentVM();
