@@ -7,7 +7,9 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
+import java.util.InputMismatchException;
 import java.util.Random;
+import java.util.Scanner;
 
 public class RM {
 	public static final int MAX_PAGES =128;
@@ -49,7 +51,7 @@ public class RM {
 			while (this.pageUsed(j)) if (j!=MAX_PAGES-1) j++; else j=0;
 			
 			if (i==0) PTR.value = (byte)(j&0xFF);
-			else this.setPageUsed(temp,j); 
+			else this.setPageUsed(temp,j); //TODO temp ne inicializuotas
 			this.setPageUsed(j, MAX_PAGES);
 			temp = j;
 			i++;
@@ -196,7 +198,7 @@ public class RM {
 		supervMemory.pageTable[b] = 0;
 	}
 	//TODO meniu parasyti
-	public int meniu (String message[])
+	public int meniu (String[] message)
 	{
 		//TODO ateina string masyvas
 		/*pvz a
@@ -212,76 +214,93 @@ public class RM {
 			Option 3: miegoti
 		
 		*/
+		int i=0;
+		Scanner scanner = new Scanner(System.in);
+		int answer;
 		System.out.println("Message: "+message[0]);
-		if (message[1])
+		if (message[1]!="")
 		{
-			System.out.println("")
+			System.out.println("");
 		
-			for (i = 0;i==message.length(),i++)
+			for (i = 1;i==message.length;i++)
 			{
-			
+				System.out.println("Option"+1+": "+message[i]);
 			}
+			try
+			{
+				answer = scanner.nextInt();
+				if (answer>message.length-1 || answer<0)
+				{
+					throw new Exception("Wrong range" );
+				}
+			}
+				
+			catch(InputMismatchException e)
+			{
+				System.out.println("You should enter an integer. in range from ");
+			}
+			catch(Exception e)
+			{
+				System.out.println("Bad range number should be between 1..100");
+			}
+			scanner.nextLine();
+		return i;
 		}
-	}
+		else return 0;
 		
 	}
-	public void start(interpretator vm)
-	{
-		String trapFlagMenu[]("trapflag","NextStep","show details","change details","run","terminate");
-		Interrupt code = this.run(vm);
-		switch (code.interruptCode)
-		{//apdoroti interupto koda
-			case 0: // TODO EXIT
-				System.out.println("Program has finished successfully");
-				break;
-			case 1: // TODO Trap FLag(menu)
-				
-				break;
-			case 2://TODO neatpazinta komanda
-				break;
-			case 3://TODO dalyba is 0
-				break;
-			case 4://TODO perzengti adresacijos reziai
-				break;
-			case 5://TODO in
-				break;
-			case 6://TODO out
-				break;
-			case 7://TODO loadshare
-				loadShr(code.reg, code.memAdress);
-				break;
-			case 8://TODO streshare
-				storeShr(code.reg, code.memAdress);
-				break;
-			case 9://TODO  fopen
-				break;
-			case 10: //TODO fread
-				break;
-			case 11: //TODO fseek
-				break;
-			case 12://TODO Fclose
-				break;
-			case 13://TODO Fdelete
-				break;
-			case 14://TODO time
-				break;
-			//case 15://TODO
-			//case 16://TODO
-			//case 17://TODO
-				
-				
-		}
-	}
+		
+	
+	
 	//TODO pabaigti
 	public boolean run(Interpretator VM) {//TODO: sitas metodas grazina interrupt koda?
 		Interrupt inter = null;
+		String trapFlagMenu[] = {"trapflag","NextStep","show details","change details","run","terminate"};
+		
 		while (true){
 			TIME = 12; //TODO sugalvoti k1 daryti su time
 			while (inter == null) { //or anything else
 				inter = VM.interpreting();
 				TIME--;
 			}
-			if (inter.interruptCode==0) return true; //TODO apdorojimai
+			//if (inter.interruptCode==0) return true; //TODO apdorojimai
+			switch (inter.interruptCode)
+			{//apdoroti interupto koda
+				case 0: // TODO EXIT
+					System.out.println("Program has finished successfully");
+					break;
+				case 1: // TODO Trap FLag(menu)
+					
+					break;
+				case 2://TODO neatpazinta komanda
+					break;
+				case 3://TODO dalyba is 0
+					break;
+				case 4://TODO perzengti adresacijos reziai
+					break;
+				case 5://TODO in
+					break;
+				case 6://TODO out
+					break;
+				case 7://TODO loadshare
+					loadShr(code.reg, code.memAdress);
+					break;
+				case 8://TODO streshare
+					storeShr(code.reg, code.memAdress);
+					break;
+				case 9://TODO  fopen
+					break;
+				case 10: //TODO fread
+					break;
+				case 11: //TODO fseek
+					break;
+				case 12://TODO Fclose
+					break;
+				case 13://TODO Fdelete
+					break;
+				case 14://TODO time
+					break;
+			}
 		}
 	}
 	
@@ -299,8 +318,8 @@ public class RM {
 		for(int i=0; i<MAX_PAGES;i++) {
 			if (r.pageUsed(i)) s++;
 		}
-		//r.run(VM);
-		r.start();
+		r.run(VM);
+		//r.start();
 		
 		//TODO 
 		r.destroyCurrentVM();
