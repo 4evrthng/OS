@@ -13,7 +13,7 @@ import java.util.InputMismatchException;
 import java.util.Random;
 import java.util.Scanner;
 
-public class RM {
+public class CopyOfRM {
 	public static final int MAX_PAGES =128;
 	long[][] userMemory = null;
 	SMem  supervMemory = null;
@@ -24,7 +24,7 @@ public class RM {
 	
 	
 	
-	public RM() {
+	public CopyOfRM() {
 		//iskirti atminties dalis, init dar kitus daiktus
 		AX = new Reg8B();
 		BX = new Reg8B();
@@ -193,9 +193,7 @@ public class RM {
 	    FileInputStream inFile = null;
 	    try {
 	    	inFile = new FileInputStream(pFile);
-	    } catch (FileNotFoundException e) {
-	    	e.printStackTrace(System.err);
-	    }
+	    
 	    FileChannel inChannel = inFile.getChannel();
 	    ByteBuffer buf = ByteBuffer.allocate(8);
 	    i = 0;
@@ -219,6 +217,11 @@ public class RM {
 	    Interpretator vmachine = new Interpretator(AX, BX, CX, SF, IP, memory);
 		this.saveNewVM(vmachine);
 		return new Interpretator(AX, BX, CX, SF, IP, memory);
+	    } 
+	    catch (FileNotFoundException e) {
+	    	e.printStackTrace(System.err);
+	    }
+		return null;
 	}
 
 	private void setPageUsed(int currentPage, int nextPage) {
@@ -349,18 +352,15 @@ public class RM {
 					return true;
 					
 				case 1: // TODO Trap FLag(menu)
-					trapFlag(VM);
+					//trapFlag(VM);
 					break;
 				case 2://TODO neatpazinta komanda
-					System.out.println("Unknown command code");
 					return true;
 					//break;
 				case 3://TODO dalyba is 0
-					System.out.println("Division by zero");
 					return true;
 					//break;
 				case 4://TODO perzengti adresacijos reziai
-					System.out.println("Address doesn't exist");
 					return true;
 					//break;
 				case 5://TODO in
@@ -400,72 +400,23 @@ public class RM {
 			}
 		}
 	}
-//Details for trap flag	
-	private void StepDetails()
-	{
-		System.out.println("Main registers and their values");//TODO ar dar reiksmiu reikia?
-		System.out.println("AX = "+AX.value);
-		System.out.println("CX = "+CX.value);
-		System.out.println("BX = "+BX.value);
-		System.out.println("IP = "+IP.value);
-		System.out.println("SF = "+SF.value);
-	}
-	private void trapFlag(Interpretator vm) {
-		// TODO Auto-generated method stub
-		String trapFlagMenu[] = {"trapflag","NextStep","Show details","change details","run"};
-		String ChangeStepDetails[] = {"Choose which register you want to change","AX","BX","CX","IP","SF"};
-		String ChangeStepDetailsValue[] = {"Change to what?"};
+	
 
-		//Scanner scanner = new Scanner(System.in);
-		int i = meniu(trapFlagMenu);
-		Interrupt inter = null;
-		switch (i)
-		{
-		case 1://NextStep
-			inter = vm.interpreting();
-			break;
-		case 2://Show details
-			StepDetails();
-			break;
-		case 3://Change details
-			int register = meniu(ChangeStepDetails);
-			int value = meniu(ChangeStepDetailsValue);
-			switch(register)
-			{
-			case 1:
-				AX.value=value;
-				break;
-			case 2:
-				BX.value = value;
-				break;
-			case 3:
-				CX.value = value;
-				break;
-			case 4:
-				IP.value = (byte) value;
-				break;
-			case 5:
-				SF.value = (byte) value;
-				break;
-			}
-			inter = vm.interpreting();
-			
-			break;
-		case 4://run
-			run(vm);
-			break;
+	/*private void trapFlag(Interpretator vm) {
+		// TODO Auto-generated method stub
+		String trapFlagMenu[] = {"trapflag","NextStep","show details","change details","run","terminate"};
+		int i = meniu
 		
-		}
-		
-	}
+		Interrupt inter = vm.interpreting();
+	}*/
 
 	public static void main(String[] args) {
-		RM r = new RM();
+		CopyOfRM r = new CopyOfRM();
 		int s=0,d=0;
 		Interpretator VM = null;
 		try {
 			VM = r.createVM("C:/Users/akazakova/Documents/GitHub/OS/Assembler/CodeBytes");
-			//"/home/helchon/Desktop/git/OS/Assembler/codeBytes");
+					//"/home/helchon/Desktop/git/OS/Assembler/codeBytes");
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
