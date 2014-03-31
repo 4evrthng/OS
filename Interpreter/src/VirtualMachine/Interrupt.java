@@ -19,5 +19,9 @@ public class Interrupt {
 	public Interrupt(int code) {
 		this.interruptCode = code;
 	}
+	
+	public String toString() {
+		return "Interrupt: " + interruptCode;
+	}
 
 }
