@@ -1,10 +1,12 @@
 // pati pati prad=ia
 package VirtualMachine;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.util.InputMismatchException;
@@ -44,7 +46,7 @@ public class RM {
 	
 	//TODO padaryti nenuosekliai ir sukurti shared memory deskriptoriu?
 	private void setSharedMem() {
-		int temp, j=0, i=0;
+		int temp=MAX_PAGES, j=0, i=0;
 		Random rand = new Random();
 		while (i < 16) {
 			j = rand.nextInt(MAX_PAGES);
@@ -61,7 +63,7 @@ public class RM {
 	
 	//TODO test shared
 	private void loadShr(Reg8B reg, int mem) {
-		int block = getSharedBlock(mem/16);
+		int block = getBlock(mem/16, supervMemory.shareMem.PTR&0xFF);
 		if (supervMemory.shareMem.getSemafor(block))  ;//TODO sugalvoti, k1 daryti, kai naudojama atmintis tuo metu
 		else {
 			supervMemory.shareMem.setSemafor(block);
@@ -72,7 +74,7 @@ public class RM {
 	}
 
 	private void storeShr(Reg8B reg, int mem) {
-		int block = getSharedBlock(mem/16);
+		int block = getBlock(mem/16, supervMemory.shareMem.PTR&0xFF);
 		if (supervMemory.shareMem.getSemafor(block))  ;//TODO sugalvoti, k1 daryti, kai naudojama atmintis tuo metu
 		else {
 			supervMemory.shareMem.setSemafor(block);
@@ -82,15 +84,89 @@ public class RM {
 		}
 	}
 	
-	private int getSharedBlock(int i) {
-		int block = supervMemory.shareMem.PTR &0xFF;
+	private int getBlock(int i, int point) {
+		int block = point;
 		while(i!=0) {
 			block = supervMemory.pageTable[block];
 			i--;
 		}
 		return block;
 	}
+	
+	//TODO test IN
+	public void IN(int mem) {
+		if ((CX.value+7)/8+ mem >= 255) AX.value =  (255 - mem +1) *8;
+		else AX.value = CX.value;
+		char c;
+		String input = "";
+		AX.value = 0;
+		BufferedReader br = new	BufferedReader(new InputStreamReader(System.in));
+		for(int i=0; i<AX.value;i++) {
+			try {
+				c = (char) br.read();
+			} catch (IOException e) {
+				break;         //TODO kazkaip apdoroti ar ka?
+			}
+			input +=c;
+		}
+		AX.value = input.length();
+		long[] words = stringToLongs(input);
+		int arrayLength = words.length, block, word;
+		for(int i=0; i<arrayLength; i++) {
+			block = getBlock(mem, PTR.value&0xFF);
+			word = mem%16;
+			userMemory[block][word] = words[i];
+			mem++;
+		}
+	}
 
+
+	private long[] stringToLongs(String input) {
+		int arrayLength = (input.length() +7)/8;
+		long[] words = new long[arrayLength];
+		long word;
+		byte b;
+		for(int i=0; i<arrayLength; i++) {
+			word = 0;
+			for(int j=0; j<8; j++) {
+				try {
+					b = (byte) input.charAt(i*8+j);
+				} catch (IndexOutOfBoundsException e) {
+					b = 0;
+				}
+				word = word | (b << (7-j)*8);
+			}
+			words[i] = word;
+		}
+		return words;
+	}
+//TODO test OUT
+	public void OUT(int mem) {
+		String s = "";
+		int charCount;
+		if ((CX.value+7)/8+ mem >= 255) charCount =  (255 - mem +1) *8;
+		else charCount = (int) CX.value;
+		long word = 0;
+		int words =(int) charCount/8;
+		byte cha = 0;
+		for(int i=0; i<words; i++) {
+			word = userMemory[getBlock(mem, PTR.value&0xFF)][mem%16];
+			for(int j=0;j<8;j++) {
+				cha = (byte) ((word >>>(7-j)*8)&0xFF);
+				s+=((char)cha);
+			}
+			mem++;
+		}
+		int chars = (int) (charCount%8);
+		if (chars != 0) {
+			word = userMemory[getBlock(mem, PTR.value&0xFF)][mem%16];
+			for(int i=0;i<chars;i++) {
+				cha = (byte) ((word >>>(7-i)*8)&0xFF);
+				s+=(char)cha;
+			}
+		}
+		System.out.println("OUT: "+s);
+	}
 
 	public Interpretator createVM(String path) throws Exception {//dar reikia sud4ti atminti i lentele ir rodyti su ptr?..
 		int i = 0, temp=0, j, s=0;
@@ -279,14 +355,26 @@ public class RM {
 				case 4://TODO perzengti adresacijos reziai
 					break;
 				case 5://TODO in
+					if (CH1.value == 1) ;//TODO
+					else {
+						CH1.value = 1;
+						IN(inter.memAdress);
+						CH1.value = 0;
+					}
 					break;
 				case 6://TODO out
+					if (CH2.value == 1) ;//TODO
+					else {
+						CH2.value = 1;
+						OUT(inter.memAdress);
+						CH2.value = 0;
+					}
 					break;
 				case 7://TODO loadshare
-					loadShr(code.reg, code.memAdress);
+					loadShr(inter.reg, inter.memAdress);
 					break;
 				case 8://TODO streshare
-					storeShr(code.reg, code.memAdress);
+					storeShr(inter.reg, inter.memAdress);
 					break;
 				case 9://TODO  fopen
 					break;
