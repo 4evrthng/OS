@@ -469,6 +469,7 @@ public class RM {
 
 		int i = meniu(trapFlagMenu);
 		Interrupt inter = null;
+		
 		switch (i)
 		{
 		case 1://NextStep
