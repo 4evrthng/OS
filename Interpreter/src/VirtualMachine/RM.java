@@ -15,6 +15,7 @@ import java.util.Scanner;
 
 public class RM {
 	public static final int MAX_PAGES =128;
+	public static final int NOT_USED_PAGE =131;
 	long[][] userMemory = null;
 	SMem  supervMemory = null;
 	int TIME = 0;
@@ -41,6 +42,7 @@ public class RM {
 		PTR = new RegB();
 		userMemory = new long[MAX_PAGES][16];
 		supervMemory = new SMem();
+		for (int i=0; i<MAX_PAGES; i++) supervMemory.pageTable[i] = NOT_USED_PAGE;
 		setSharedMem();
 	}
 	
@@ -63,7 +65,7 @@ public class RM {
 	
 	//TODO test shared
 	private void loadShr(Reg8B reg, int mem) {
-		int block = getBlock(mem/16, supervMemory.shareMem.PTR&0xFF);
+		int block = getBlock(mem, supervMemory.shareMem.PTR&0xFF);
 		if (supervMemory.shareMem.getSemafor(block))  ;//TODO sugalvoti, k1 daryti, kai naudojama atmintis tuo metu
 		else {
 			supervMemory.shareMem.setSemafor(block);
@@ -74,7 +76,7 @@ public class RM {
 	}
 
 	private void storeShr(Reg8B reg, int mem) {
-		int block = getBlock(mem/16, supervMemory.shareMem.PTR&0xFF);
+		int block = getBlock(mem, supervMemory.shareMem.PTR&0xFF);
 		if (supervMemory.shareMem.getSemafor(block))  ;//TODO sugalvoti, k1 daryti, kai naudojama atmintis tuo metu
 		else {
 			supervMemory.shareMem.setSemafor(block);
@@ -86,6 +88,7 @@ public class RM {
 	
 	private int getBlock(int i, int point) {
 		int block = point;
+		i = i/16;
 		while(i!=0) {
 			block = supervMemory.pageTable[block];
 			i--;
@@ -205,7 +208,7 @@ public class RM {
 	    		memory[i][j] = ((ByteBuffer) (buf.flip())).asLongBuffer().get();
 	    		buf.clear();
 	    		j++;
-	    		if (j==8) {
+	    		if (j==16) {
 	    			i++;
 	    			j=0;
 	    		}
@@ -229,7 +232,7 @@ public class RM {
 
 
 	private boolean pageUsed(int k) {
-		if (supervMemory.pageTable[k]!=0) return true;
+		if (supervMemory.pageTable[k]!=NOT_USED_PAGE) return true;
 		else return false;
 	}
 
@@ -271,7 +274,7 @@ public class RM {
 	public void clearPage(int b) {
 		int i = supervMemory.pageTable[b];
 		if (i!=MAX_PAGES) clearPage(i);
-		supervMemory.pageTable[b] = 0;
+		supervMemory.pageTable[b] = NOT_USED_PAGE;
 	}
 	//TODO meniu parasyti
 	public int meniu (String[] message)
@@ -335,6 +338,7 @@ public class RM {
 		Disk disk = null;
 		
 		while (true){
+			inter = null;
 			TIME = 12; //TODO sugalvoti k1 daryti su time
 			while (inter == null) { //or anything else
 				inter = VM.interpreting();
@@ -492,9 +496,14 @@ public class RM {
 		Interpretator VM = null;
 		int filenum = r.meniu(ChooseFileNames);
 		try {
+<<<<<<< HEAD
 			VM = r.createVM(FileNames[filenum]);
 			//VM = r.createVM("C:/Users/akazakova/Documents/GitHub/OS/Assembler/CodeBytes");
 			//"/home/helchon/Desktop/git/OS/Assembler/codeBytes");
+=======
+			VM = r.createVM("C:/Users/akazakova/Documents/GitHub/OS/Assembler/CodeBytes");
+			//VM = r.createVM("C:/Users/Helch/Documents/GitHub/OS/Assembler/testProg02_OUT");
+>>>>>>> 62a7e2534b6b5ab134119b425ac5934998c1f9aa
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
