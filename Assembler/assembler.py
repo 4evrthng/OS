@@ -236,7 +236,7 @@ for lineIndex, codeLine in enumerate(codeLineList):
 				
 	#DM
 	if codeLine[0].upper() in ('DS'):
-		for i in range( 0 : commandLength.commandLength(codeLine)):
+		for i in range( 0 , commandLength.commandLength(codeLine)):
 			assembledCode.extend((0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00))
 			
 	

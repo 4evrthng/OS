@@ -300,12 +300,12 @@ public class RM {
 		if ( message.length>1)
 		{
 			System.out.println("Instruction: Enter the number of the option you've chosen");
-		
-			while (message[i+1]!=null)
+			i++;
+			while (message[i]!=null)
 			{
-				i++;
 				System.out.println("Option "+i+": "+message[i]);
-				
+				i++;
+				if(message.length==i) break;
 			}
 			try
 			{
@@ -517,6 +517,7 @@ public class RM {
 		int i;
 		String FileNames[] ={"CodeBytes","prog2"};//TODO get file names to variable FileNames
 		String ChooseFileNames[] = new String[32] ;
+		String ChooseTF[] = {"Do you want track flag","Yes","No"};
 		ChooseFileNames[0]="Choose a program to run";
 		//filling up the meniu array
 		for (i=1; i<FileNames.length+1;i++)
@@ -529,6 +530,7 @@ public class RM {
 
 
 		int filenum = r.meniu(ChooseFileNames)-1;
+		if (r.meniu(ChooseTF)==1) r.SF.setTF();
 		try {
 			System.out.println("C:/Users/akazakova/Documents/GitHub/OS/Assembler/"+FileNames[filenum]);
 

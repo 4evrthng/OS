@@ -1,0 +1,13 @@
+RM
+LOAD AX sk2
+ADD AX sk2
+@testLabel
+ADD AX 10
+STORE sk1 AX
+
+EXIT
+
+DW sk3 10
+DW sk1 10
+DW sk2 20
+
