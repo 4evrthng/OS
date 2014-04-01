@@ -396,19 +396,19 @@ public class RM {
 					
 					int mem = inter.memAdress;
 					String path = "";
-					j=0;
 					byte cha = 0;
-					long word = 0;
-					while ((cha != 10)|(mem+j!=256)) {
-						word = userMemory[getBlock(mem+j, PTR.value&0xFF)][(mem+j)%16];
-						i = 0;
-						while((cha!=10)&&(i<8)) {
-							cha = (byte) ((word >>>(7-i)*8)&0xFF);
-							if (cha!=10) path+=(char)cha;
-							i++;
+					if (mem+2<256) {
+						long word1 = userMemory[getBlock(mem, PTR.value&0xFF)][(mem)%16];
+						long word2 = userMemory[getBlock(mem+1, PTR.value&0xFF)][(mem+1)%16];
+						for(i=0; i<8; i++) {
+							cha = (byte) ((word1 >>>(7-i)*8)&0xFF);
+							path+=(char)cha;
 						}
-						j++;
-					}
+						for(i=0; i<8; i++) {
+							cha = (byte) ((word2 >>>(7-i)*8)&0xFF);
+							path+=(char)cha;
+						}
+					}//TODO else interrupt jei uz ribu atminties iseina
 					
 					BX.value=disk.fileOpen(path);  //L: path kaip ir padariau.. gal, pasitikslint
 					//TODO kaip patikrint ar toks failas jau egzistuoja?
