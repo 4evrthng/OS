@@ -297,13 +297,15 @@ public class RM {
 		Scanner scanner = new Scanner(System.in);
 		int answer;
 		System.out.println("Message: "+message[0]);
-		if (message[1]!="")
+		if ( message.length>1)
 		{
-			System.out.println("");
+			System.out.println("Instruction: Enter the number of the option you've chosen");
 		
-			for (i = 1;i==message.length;i++)
+			while (message[i+1]!=null)
 			{
-				System.out.println("Option"+1+": "+message[i]);
+				i++;
+				System.out.println("Option "+i+": "+message[i]);
+				
 			}
 			try
 			{
@@ -421,7 +423,7 @@ public class RM {
 					for (i=1;i==CX.value;i++)
 					{
 						//kazkokia iteruojama atmintis
-						disk.fileWrite(BX.value, "?");//TODO: romai paziurek, neisivaizduoju ka siust
+						//disk.fileWrite(BX.value, "?");//TODO: romai paziurek, neisivaizduoju ka siust
 						AX.value ++;
 					}
 						break;
@@ -513,20 +515,24 @@ public class RM {
 
 	public static void main(String[] args) {
 		int i;
-		String FileNames[] ={"file"};//TODO get file names to variable FileNames
-		String ChooseFileNames[] = {"Choose a program to run"};
+		String FileNames[] ={"CodeBytes","prog2"};//TODO get file names to variable FileNames
+		String ChooseFileNames[] = new String[32] ;
+		ChooseFileNames[0]="Choose a program to run";
 		//filling up the meniu array
-		for (i=1; i==FileNames.length-1;i++)
+		for (i=1; i<FileNames.length+1;i++)
 		{	
 			ChooseFileNames[i] = FileNames[i-1];
 		}
 		RM r = new RM();
 		int s=0,d=0;
 		Interpretator VM = null;
-		int filenum = r.meniu(ChooseFileNames);
-		try {
 
-			VM = r.createVM(FileNames[filenum]);
+
+		int filenum = r.meniu(ChooseFileNames)-1;
+		try {
+			System.out.println("C:/Users/akazakova/Documents/GitHub/OS/Assembler/"+FileNames[filenum]);
+
+			VM = r.createVM("C:/Users/akazakova/Documents/GitHub/OS/Assembler/"+FileNames[filenum]);
 			//VM = r.createVM("C:/Users/akazakova/Documents/GitHub/OS/Assembler/CodeBytes");
 			//"/home/helchon/Desktop/git/OS/Assembler/codeBytes");
 
