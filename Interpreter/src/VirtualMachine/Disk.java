@@ -18,6 +18,7 @@ public class Disk {
 	private SMem  supervMemory;
 	private FileChannel diskChanel;
 	
+	//TODO failu pavadinimai, Ir kaip juos ten patalpinti
 	public Disk (Reg8B AX, Reg8B BX, Reg8B CX, long[][] userMemory, SMem  supervMemory) {
 		this.AX = AX;
 		this.BX = BX;

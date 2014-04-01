@@ -327,14 +327,12 @@ public class RM {
 		return 0;
 		
 	}
-		
-	
+
 	
 	//TODO pabaigti
 	public boolean run(Interpretator VM) {//TODO: sitas metodas grazina interrupt koda?
 		Interrupt inter = null;
 		Disk disk = null;
-		//String trapFlagMenu[] = {"trapflag","NextStep","show details","change details","run","terminate"};
 		
 		while (true){
 			TIME = 12; //TODO sugalvoti k1 daryti su time
@@ -342,7 +340,7 @@ public class RM {
 				inter = VM.interpreting();
 				TIME--;
 			}
-			//if (inter.interruptCode==0) return true; //TODO apdorojimai
+			
 			switch (inter.interruptCode)
 			{//apdoroti interupto koda
 				case 0: // TODO EXIT
@@ -364,7 +362,7 @@ public class RM {
 					System.out.println("Address doesn't exist");
 					return true;
 					//break;
-				case 5://TODO in
+				case 5:
 					if (CH1.value == 1) ;//TODO
 					else {
 						CH1.value = 1;
@@ -372,7 +370,7 @@ public class RM {
 						CH1.value = 0;
 					}
 					break;
-				case 6://TODO out
+				case 6:
 					if (CH2.value == 1) ;//TODO
 					else {
 						CH2.value = 1;
@@ -380,14 +378,15 @@ public class RM {
 						CH2.value = 0;
 					}
 					break;
-				case 7://TODO loadshare
+				case 7:
 					loadShr(inter.reg, inter.memAdress);
 					break;
-				case 8://TODO streshare
+				case 8:
 					storeShr(inter.reg, inter.memAdress);
 					break;
 				case 9://TODO  fopen
 					disk = new Disk(AX, BX, CX, userMemory, supervMemory);
+					disk.fileOpen("?");
 					//TODO kaip patikrint ar toks failas jau egzistuoja?
 					break;
 				case 10: //TODO fread
@@ -404,28 +403,35 @@ public class RM {
 					//ner failo panaikinimo
 					break;
 				case 14://TODO time
-					//ka daryti cia?
+					TIME = 12;
+					//if yra kiti procesai, tada paleidziam juos 
 					break;
 			}
 		}
 	}
-//Details for trap flag	
-	private void StepDetails()
-	{
-		System.out.println("Main registers and their values");//TODO ar dar reiksmiu reikia?
-		System.out.println("AX = "+AX.value);
-		System.out.println("CX = "+CX.value);
-		System.out.println("BX = "+BX.value);
-		System.out.println("IP = "+IP.value);
-		System.out.println("SF = "+SF.value);
-	}
+
 	private void trapFlag(Interpretator vm) {
 		// TODO Auto-generated method stub
-		String trapFlagMenu[] = {"trapflag","NextStep","Show details","change details","run"};
-		String ChangeStepDetails[] = {"Choose which register you want to change","AX","BX","CX","IP","SF"};
-		String ChangeStepDetailsValue[] = {"Change to what?"};
+		String trapFlagMenu[] = 			{"trapflag",
+											"NextStep",
+											"Show details",
+											"change details",
+											"run",
+											"start another program"};
+		String ChangeStepDetails[] = 		{"Choose which register you want to change",
+											"AX",
+											"BX",
+											"CX",
+											"IP",
+											"SF"};
+		String ChangeStepDetailsValue[] = 	{"Change to what?"};
+		String VMDetails[] = 				{"Main registers and their values "
+											+ "\nAX = "+AX.value
+											+ "\nCX = "+CX.value
+											+ "\nBX = "+BX.value
+											+ "\nIP = "+IP.value
+											+ "\nSF = "+SF.value};
 
-		//Scanner scanner = new Scanner(System.in);
 		int i = meniu(trapFlagMenu);
 		Interrupt inter = null;
 		switch (i)
@@ -433,8 +439,8 @@ public class RM {
 		case 1://NextStep
 			inter = vm.interpreting();
 			break;
-		case 2://Show details
-			StepDetails();
+		case 2://Show details//TODO ar dar reiksmiu reikia?
+			meniu(VMDetails);
 			break;
 		case 3://Change details
 			int register = meniu(ChangeStepDetails);
@@ -456,6 +462,10 @@ public class RM {
 			case 5:
 				SF.value = (byte) value;
 				break;
+			case 6://TODO add new file
+				saveCurrentVM();
+				RM.main(null);
+					break;
 			}
 			inter = vm.interpreting();
 			
@@ -469,23 +479,27 @@ public class RM {
 	}
 
 	public static void main(String[] args) {
-		String Choose = "Choose a program to run";
-		//TODO get file names to variable FileNames
-		String FileNames ="file";
-		String ChooseFileNames[] = {Choose,FileNames};
-		int filenum;
-		//filenum= meniu(ChooseFileNames);
+		int i;
+		String FileNames[] ={"file"};//TODO get file names to variable FileNames
+		String ChooseFileNames[] = {"Choose a program to run"};
+		//filling up the meniu array
+		for (i=1; i==FileNames.length-1;i++)
+		{	
+			ChooseFileNames[i] = FileNames[i-1];
+		}
 		RM r = new RM();
 		int s=0,d=0;
 		Interpretator VM = null;
+		int filenum = r.meniu(ChooseFileNames);
 		try {
-			VM = r.createVM("C:/Users/akazakova/Documents/GitHub/OS/Assembler/CodeBytes");
+			VM = r.createVM(FileNames[filenum]);
+			//VM = r.createVM("C:/Users/akazakova/Documents/GitHub/OS/Assembler/CodeBytes");
 			//"/home/helchon/Desktop/git/OS/Assembler/codeBytes");
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		for(int i=0; i<MAX_PAGES;i++) {
+		for(i=0; i<MAX_PAGES;i++) {
 			if (r.pageUsed(i)) s++;
 		}
 		r.run(VM);
@@ -493,7 +507,7 @@ public class RM {
 		
 		//TODO 
 		r.destroyCurrentVM();
-		for(int i=0; i<MAX_PAGES;i++) {
+		for(i=0; i<MAX_PAGES;i++) {
 			if (r.pageUsed(i)) d++;
 		}
 		System.out.println(s);
