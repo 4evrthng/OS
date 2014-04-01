@@ -496,14 +496,11 @@ public class RM {
 		Interpretator VM = null;
 		int filenum = r.meniu(ChooseFileNames);
 		try {
-<<<<<<< HEAD
+
 			VM = r.createVM(FileNames[filenum]);
 			//VM = r.createVM("C:/Users/akazakova/Documents/GitHub/OS/Assembler/CodeBytes");
 			//"/home/helchon/Desktop/git/OS/Assembler/codeBytes");
-=======
-			VM = r.createVM("C:/Users/akazakova/Documents/GitHub/OS/Assembler/CodeBytes");
-			//VM = r.createVM("C:/Users/Helch/Documents/GitHub/OS/Assembler/testProg02_OUT");
->>>>>>> 62a7e2534b6b5ab134119b425ac5934998c1f9aa
+
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
