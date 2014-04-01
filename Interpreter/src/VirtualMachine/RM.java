@@ -333,6 +333,7 @@ public class RM {
 	//TODO pabaigti
 	public boolean run(Interpretator VM) {//TODO: sitas metodas grazina interrupt koda?
 		Interrupt inter = null;
+		Disk disk = null;
 		//String trapFlagMenu[] = {"trapflag","NextStep","show details","change details","run","terminate"};
 		
 		while (true){
@@ -386,16 +387,24 @@ public class RM {
 					storeShr(inter.reg, inter.memAdress);
 					break;
 				case 9://TODO  fopen
+					disk = new Disk(AX, BX, CX, userMemory, supervMemory);
+					//TODO kaip patikrint ar toks failas jau egzistuoja?
 					break;
 				case 10: //TODO fread
+					//kaip suzinoti kokie operandai naudojami?
+					ByteBuffer i = disk.fileRead(0, 0);
 					break;
 				case 11: //TODO fseek
+					disk.fileRead(0,0); //kiek suzinoti kiek juda ir kaip pajudeti i kita puse?
 					break;
 				case 12://TODO Fclose
+					//nera failo uzdarymo
 					break;
 				case 13://TODO Fdelete
+					//ner failo panaikinimo
 					break;
 				case 14://TODO time
+					//ka daryti cia?
 					break;
 			}
 		}
@@ -460,6 +469,12 @@ public class RM {
 	}
 
 	public static void main(String[] args) {
+		String Choose = "Choose a program to run";
+		//TODO get file names to variable FileNames
+		String FileNames ="file";
+		String ChooseFileNames[] = {Choose,FileNames};
+		int filenum;
+		//filenum= meniu(ChooseFileNames);
 		RM r = new RM();
 		int s=0,d=0;
 		Interpretator VM = null;
