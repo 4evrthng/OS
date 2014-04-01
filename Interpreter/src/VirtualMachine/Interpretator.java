@@ -162,7 +162,7 @@ public class Interpretator {
 			break;
 		//JS--------------------------------+
 		case 0x17:	 // jei OF = SF , arba CF = 0, bet ZF != 1.
-			if ((SF.getOF() == SF.getSF()) || (SF.getCF() && !SF.getZF()))
+			if (!((SF.getOF() != SF.getSF()) || SF.getCF())&!SF.getZF()) //((SF.getOF() == SF.getSF()) || (SF.getCF() && !SF.getZF()))
 				IP.value = cmdB[2];
 			break;
 		//EXIT--------------------------------+

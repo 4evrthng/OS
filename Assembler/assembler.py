@@ -230,12 +230,19 @@ for lineIndex, codeLine in enumerate(codeLineList):
 			stringStart = stringStart + 1
 			string = codeLinesUnsplit[lineIndex][stringStart : ]
 		for i in range(0, len(string)):
+                        if string[i] != '\n':
 				assembledCode.append( string[i])
+			else:
+                                assembledCode.append( 0x00)
 		for i in range(0, 8 - len(string) % 8):
 				assembledCode.append( 0x00)
 				
 	#DM
+<<<<<<< HEAD
 	if codeLine[0].upper() in ('DS'):
+=======
+	if codeLine[0].upper() in ('DM'):
+>>>>>>> 8c3c8721a6b7df624cef29a3d4070c28a79fb0f3
 		for i in range( 0 , commandLength.commandLength(codeLine)):
 			assembledCode.extend((0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00))
 			
