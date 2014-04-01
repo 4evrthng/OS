@@ -100,6 +100,7 @@ public class Disk {
 		try {
 			//Read the root directory which starts in sector 1 (byte 512)
 			for (long i = 512; i < 1024; i = i + 16) {
+				fileName = fileName.substring(0, Math.min(fileName.length() - 1, 12));
 				ByteBuffer fileNameCandidate = ByteBuffer.allocate(fileName.length());
 				diskChanel.position(i);
 				diskChanel.read(fileNameCandidate);
@@ -153,7 +154,7 @@ public class Disk {
 			
 			for (int i = 0; i < data.length; i += 512) {
 				
-				byte dataSector[] = Arrays.copyOfRange(data, i, Math.min(i + 512 - 1, data.length));
+				byte dataSector[] = Arrays.copyOfRange(data, i, Math.min(i + 512, data.length));
 				
 				diskChanel.position((currentSector & 0xFF) * 512);
 				diskChanel.write(ByteBuffer.wrap(dataSector));
@@ -173,12 +174,28 @@ public class Disk {
 	}
 	public ByteBuffer fileRead (long fileHandle, long lenght) {
 		
-		byte firstSector = getFirstSector(fileHandle);
+		byte currentSector = getFirstSector(fileHandle);
 		ByteBuffer output = ByteBuffer.allocate((int)lenght);
 		
 		try {
-			diskChanel.position((firstSector & 0xFF) * 512);
-			diskChanel.read(output);
+			while ((currentSector & 0xFF) != 255 && lenght > 0) {
+				
+				System.out.print(currentSector + "\n");
+				
+				ByteBuffer sector = ByteBuffer.allocate(Math.min((int) lenght, 512));
+				diskChanel.position((currentSector & 0xFF) * 512);
+				diskChanel.read(sector);
+				
+				//System.out.print(new String(sector.array()) + "\n");
+				sector.rewind();
+				
+				output.put(sector);
+				
+				//System.out.print(new String(output.array()) + "\n");
+				
+				lenght -= 512;
+				currentSector = getNextSector(currentSector);
+			}
 			
 		} catch (IOException x) {
 			System.out.println("I/O Exception in fileRead: " + x);
@@ -189,12 +206,12 @@ public class Disk {
 	public static void main(String[] args) throws IOException {
 		Disk testDisk = new Disk (new Reg8B(), new Reg8B(), new Reg8B(), new long[RM.MAX_PAGES][16], new SMem());
 		
-		//ByteBuffer temp = testDisk.fileRead(560, 100);
+		//ByteBuffer temp = testDisk.fileRead(512, 1000);
 		//System.out.print(new String (temp.array()));
 		
-		testDisk.fileWrite(512, "asd".getBytes());
+		testDisk.fileWrite(512, "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaabbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbcccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccdddddddddddddddddddddddddeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee".getBytes());
 		
-		//System.out.print(testDisk.fileOpen("nastia"));
+		//System.out.print(testDisk.fileOpen("lauryyyyyyynahahahahahah"));
 	        
 	}
 }
