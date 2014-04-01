@@ -336,7 +336,7 @@ public class RM {
 	public boolean run(Interpretator VM) {//TODO: sitas metodas grazina interrupt koda?
 		Interrupt inter = null;
 		Disk disk = null;
-		int i;
+		int i,j;
 		
 		while (true){
 			inter = null;
@@ -391,7 +391,24 @@ public class RM {
 					break;
 				case 9://TODO  fopen
 					disk = new Disk(AX, BX, CX, userMemory, supervMemory);
-					BX.value=disk.fileOpen("?");
+					
+					int mem = inter.memAdress;
+					String path = "";
+					j=0;
+					byte cha = 0;
+					long word = 0;
+					while ((cha != 10)|(mem+j!=256)) {
+						word = userMemory[getBlock(mem+j, PTR.value&0xFF)][(mem+j)%16];
+						i = 0;
+						while((cha!=10)&&(i<8)) {
+							cha = (byte) ((word >>>(7-i)*8)&0xFF);
+							if (cha!=10) path+=(char)cha;
+							i++;
+						}
+						j++;
+					}
+					
+					BX.value=disk.fileOpen(path);  //L: path kaip ir padariau.. gal, pasitikslint
 					//TODO kaip patikrint ar toks failas jau egzistuoja?
 					break;
 				case 10: //TODO fread
