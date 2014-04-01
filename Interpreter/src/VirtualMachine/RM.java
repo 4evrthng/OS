@@ -472,7 +472,7 @@ public class RM {
 		switch (i)
 		{
 		case 1://NextStep
-			inter = vm.interpreting();
+			run(vm);
 			break;
 		case 2://Show details//TODO ar dar reiksmiu reikia?
 			meniu(VMDetails);
@@ -502,11 +502,13 @@ public class RM {
 				RM.main(null);
 					break;
 			}
-			inter = vm.interpreting();
+			run(vm);
 			
 			break;
 		case 4://run
+			
 			run(vm);
+			SF.clearTF()
 			break;
 		
 		}
