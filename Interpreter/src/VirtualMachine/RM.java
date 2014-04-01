@@ -336,6 +336,7 @@ public class RM {
 	public boolean run(Interpretator VM) {//TODO: sitas metodas grazina interrupt koda?
 		Interrupt inter = null;
 		Disk disk = null;
+		int i;
 		
 		while (true){
 			inter = null;
@@ -390,23 +391,34 @@ public class RM {
 					break;
 				case 9://TODO  fopen
 					disk = new Disk(AX, BX, CX, userMemory, supervMemory);
-					disk.fileOpen("?");
+					BX.value=disk.fileOpen("?");
 					//TODO kaip patikrint ar toks failas jau egzistuoja?
 					break;
 				case 10: //TODO fread
 					//kaip suzinoti kokie operandai naudojami?
-					ByteBuffer i = disk.fileRead(0, 0);
+					ByteBuffer buf = disk.fileRead(BX.value, CX.value);
+					AX.value = buf.array().length;
 					break;
-				case 11: //TODO fseek
+				case 11: //TODO fwrite
+					AX.value = 0;
+					for (i=1;i==CX.value;i++)
+					{
+						//kazkokia iteruojama atmintis
+						disk.fileWrite(BX.value, "?");//TODO: romai paziurek, neisivaizduoju ka siust
+						AX.value ++;
+					}
+						break;
+				case 12: //TODO fseek
 					disk.fileRead(0,0); //kiek suzinoti kiek juda ir kaip pajudeti i kita puse?
+					
 					break;
-				case 12://TODO Fclose
+				case 13://TODO Fclose
 					//nera failo uzdarymo
 					break;
-				case 13://TODO Fdelete
+				case 14://TODO Fdelete
 					//ner failo panaikinimo
 					break;
-				case 14://TODO time
+				case 15://TODO time
 					TIME = 12;
 					//if yra kiti procesai, tada paleidziam juos 
 					break;
@@ -509,7 +521,7 @@ public class RM {
 			if (r.pageUsed(i)) s++;
 		}
 		r.run(VM);
-		//r.start();
+		
 		
 		//TODO 
 		r.destroyCurrentVM();
