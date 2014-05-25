@@ -1,0 +1,11 @@
+package Devices;
+
+public class CPU implements StepByStep {
+	
+	private Process currentProcess;
+	
+	public void step() {
+		if (currentProcess != null)
+			currentProcess.step();
+	}
+}

@@ -1,0 +1,12 @@
+package Processes;
+
+import Devices.StepByStep;
+
+public class Process implements StepByStep {
+
+	public void step() {
+		// TODO Auto-generated method stub
+
+	}
+
+}
