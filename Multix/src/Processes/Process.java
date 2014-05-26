@@ -12,7 +12,7 @@ public abstract class Process implements StepByStep {
 	private Reg8B CS, DS, AX, BX, CX, IP;
 	private StatusFlag SF;
 	private RegB CH1, CH2, CH3, TI, SI, PI, MODE, PTR;
-	private CPU cpu = new CPU();
+	public CPU cpu = new CPU();
 	
 	public abstract void step();
 }
