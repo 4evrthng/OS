@@ -10,18 +10,16 @@ public class CPU implements StepByStep {
 	
 	private Process currentProcess;
 	
-	public Reg8B CS, DS, AX, BX, CX, IP;
+	public Reg8B AX, BX, CX;
 	public StatusFlag SF;
-	public RegB CH1, CH2, CH3, TI, SI, PI, MODE, PTR;
+	public RegB IP, CH1, CH2, CH3, TI, SI, PI, MODE, PTR;
 	
 	public CPU() {
-		CS = new Reg8B();
-		DS = new Reg8B();
 		AX = new Reg8B();
 		BX = new Reg8B();
 		CX = new Reg8B();
-		IP = new Reg8B();
 		SF = new StatusFlag();
+		IP = new RegB();
 		CH1 = new RegB();
 		CH2 = new RegB();
 		CH3 = new RegB();

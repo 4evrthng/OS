@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<session version="1.0">
+<refactoring comment="Copy 3 elements to &apos;Multix/src/Registers&apos;&#x0D;&#x0A;- Original project: &apos;Interpreter&apos;&#x0D;&#x0A;- Destination element: &apos;Multix/src/Registers&apos;&#x0D;&#x0A;- Original elements:&#x0D;&#x0A;     VirtualMachine.RegB.java&#x0D;&#x0A;     VirtualMachine.Reg8B.java&#x0D;&#x0A;     VirtualMachine.StatusFlag.java" description="Copy compilation units" destination="=Multix/src&lt;Registers" element1="/src&lt;VirtualMachine{RegB.java" element2="/src&lt;VirtualMachine{Reg8B.java" element3="/src&lt;VirtualMachine{StatusFlag.java" files="0" flags="589830" folders="0" id="org.eclipse.jdt.ui.copy" policy="org.eclipse.jdt.ui.copyResources" stamp="1401130434127" units="3" version="1.0"/>
+</session>

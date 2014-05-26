@@ -1,0 +1,18 @@
+package Devices;
+
+import Interfaces.StepByStep;
+import Processes.Process;
+
+public class CPU implements StepByStep {
+	
+	private Process currentProcess;
+	
+	Reg8B AX, BX, CX;
+	StatusFlag SF;
+	RegB IP, CH1, CH2, CH3, TI, SI, PI, MODE, PTR;
+	
+	public void step() {
+		if (currentProcess != null)
+			currentProcess.step();
+	}
+}
